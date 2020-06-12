@@ -49,7 +49,7 @@ write_nodules = 1;
 if exist('numpy_nodules', 'dir')
     rmdir('numpy_nodules','s');
 end
-CTnum = str2num(CTFolderName(8)); %#ok<ST2NM>
+CTnum = str2num(CTFolderName(end)); %#ok<ST2NM>
 if exist(strcat('chestXRays',int2str(CTnum)), 'dir')
     rmdir(strcat('chestXRays',int2str(CTnum)),'s');
 end
