@@ -33,6 +33,7 @@ int main(int argc, const char* argv[]) {
 
     if (argc != 5) {
         cout << "USAGE: ct_filename nodule_specs.txt voxel_xy_dim voxel_z_dim" << endl;
+        cout << "Enter arguments to use" << endl;
         return 1;
     }
 

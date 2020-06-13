@@ -41,14 +41,19 @@
 
 % CTtoTrainingDataPointSource('chestCT0/I/NVFRWCBT/5O4VNQBN/', 'positions_0.txt');
 
+
+
 function CTtoTrainingDataPointSource(CTFolderName, specificationsFileName)
 warning('off','all');
 
+disp(getenv('PATH'));
+
 write_ct = 1;
-write_nodules = 1;
+write_nodules = 0;
 if exist('numpy_nodules', 'dir')
     rmdir('numpy_nodules','s');
 end
+disp(CTFolderName);
 CTnum = str2num(CTFolderName(end)); %#ok<ST2NM>
 if exist(strcat('chestXRays',int2str(CTnum)), 'dir')
     rmdir(strcat('chestXRays',int2str(CTnum)),'s');
@@ -60,12 +65,24 @@ mkdir(strcat('chestXRays',int2str(CTnum)));
 
 CTarrayOriginal = CTarrayOriginal - 1000;
 
+samp = zeros(3);
+
+
+disp("Array Size:");
+disp(size(CTarrayOriginal));
+disp("samp size:");
+disp(size(samp));
+
 CTarrayOriginal(CTarrayOriginal > 500) = NaN;
 CTarrayOriginal = fillmissing(CTarrayOriginal, 'linear');
 
 if write_ct
+    disp(CTarrayOriginal);
     % write CT to text file
-    dlmwrite(strcat('textCTs/CT_',int2str(CTnum),'.txt'),CTarrayOriginal);
+   % dlmwrite(strcat('textCTs/CT_',int2str(CTnum),'.txt'),CTarrayOriginal);
+   matrixCTFile = fopen('textCTs/realCT.txt', 'wt');
+   fprintf(matrixCTFile, '%d %d %d\n', CTarrayOriginal);
+   fclose(matrixCTFile);
 end
 
 scaleFactor = double(floatVoxelDims(1)/floatVoxelDims(3));
@@ -163,7 +180,8 @@ xraynums = linspace(1,numPositions,numPositions);
 fprintf(specs_file,formatSpec,transpose([transpose(xraynums),nodulePositions,noduleDimensions,noduleSizes,noduleHUs]));
 fclose(specs_file);
 
-system('make');
+
+system('mingw32-make');
 cmd = strcat('./lungnodulesynthesizer', {' '}, 'textCTs/CT_',int2str(CTnum), '.txt', {' '}, 'nodule_specs_',int2str(CTnum),'.txt', {' '}, num2str(floatVoxelDims(3)), {' '}, num2str(floatVoxelDims(1)));
 system(char(cmd));
 
@@ -171,6 +189,8 @@ system(char(cmd));
 
 files=dir('textXRays');
 files=files(~ismember({files.name},{'.','..'}));
+disp("reached here lmao");
+
 for k=1:length(files)
     xraynum = k-1;
     %nodulePosition = nodulePositions(k,:);
