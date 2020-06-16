@@ -36,6 +36,8 @@ int main(int argc, const char * argv[]) {
     }
 
 
+    cout << "Main.cpp activated" << endl;
+
     string ct_filename = argv[1];
 
     string nodule_specs_filename = argv[2];

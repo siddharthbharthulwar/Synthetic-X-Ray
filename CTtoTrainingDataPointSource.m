@@ -77,7 +77,6 @@ CTarrayOriginal(CTarrayOriginal > 500) = NaN;
 CTarrayOriginal = fillmissing(CTarrayOriginal, 'linear');
 
 if write_ct
-    disp(CTarrayOriginal);
     % write CT to text file
    % dlmwrite(strcat('textCTs/CT_',int2str(CTnum),'.txt'),CTarrayOriginal);
    matrixCTFile = fopen('textCTs/realCT.txt', 'wt');
@@ -181,15 +180,14 @@ fprintf(specs_file,formatSpec,transpose([transpose(xraynums),nodulePositions,nod
 fclose(specs_file);
 
 
-system('mingw32-make');
-cmd = strcat('./lungnodulesynthesizer', {' '}, 'textCTs/CT_',int2str(CTnum), '.txt', {' '}, 'nodule_specs_',int2str(CTnum),'.txt', {' '}, num2str(floatVoxelDims(3)), {' '}, num2str(floatVoxelDims(1)));
+system('make');
+cmd = strcat('lungnodulesynthesizer.exe', {' '}, 'textCTs/CT_',int2str(CTnum), '.txt', {' '}, 'nodule_specs_',int2str(CTnum),'.txt', {' '}, num2str(floatVoxelDims(3)), {' '}, num2str(floatVoxelDims(1)));
 system(char(cmd));
 
 % make c++ loop through all nodules, several sources, and name things accordingly
 
 files=dir('textXRays');
 files=files(~ismember({files.name},{'.','..'}));
-disp("reached here lmao");
 
 for k=1:length(files)
     xraynum = k-1;

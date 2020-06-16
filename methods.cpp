@@ -48,17 +48,17 @@ void insert_chunk(Chunk chunk, Chunk &backup, vector<vector<vector<Voxel *>>> &c
     backup.position = chunk.position;
     // make backup same dimensions as chunk
     backup.voxel_array.resize(chunk.voxel_array.size());
-    for (int k = 0; k < chunk.voxel_array.size(); k++){
+    for (unsigned int k = 0; k < chunk.voxel_array.size(); k++){
         backup.voxel_array[k].resize(chunk.voxel_array[k].size());
-        for (int i = 0; i < chunk.voxel_array[k].size(); i++){
+        for (unsigned int i = 0; i < chunk.voxel_array[k].size(); i++){
             backup.voxel_array[k][i].resize(chunk.voxel_array[k][i].size());
         }
     }
 
     int ct_x, ct_y, ct_z;
-    for (int k = 0; k < chunk.voxel_array.size(); k++){
-        for (int i = 0; i < chunk.voxel_array[k].size(); i++){
-            for (int j = 0; j < chunk.voxel_array[k][i].size(); j++){
+    for (unsigned int k = 0; k < chunk.voxel_array.size(); k++){
+        for (unsigned int i = 0; i < chunk.voxel_array[k].size(); i++){
+            for (unsigned int j = 0; j < chunk.voxel_array[k][i].size(); j++){
                 ct_x = chunk.position.x + i;
                 ct_y = chunk.position.y + j;
                 ct_z = chunk.position.z + k;
@@ -67,6 +67,11 @@ void insert_chunk(Chunk chunk, Chunk &backup, vector<vector<vector<Voxel *>>> &c
                 if (chunk.voxel_array[k][i][j]->attenuation != INVALID){
                     ctVoxels[ct_z][ct_x][ct_y] = chunk.voxel_array[k][i][j];
                 }
+
+                cout << "j: " << j << " / " << chunk.voxel_array[k][i].size() << "\n";
+                cout << "i: " << i << " / " << chunk.voxel_array[k].size() << "\n";
+                cout << "k: " << k << " / " << chunk.voxel_array.size() << "\n";
+
             }
         }
     }
@@ -191,7 +196,7 @@ int findInteger(string s) {
 
     char buf[10];
     int j = 0;
-    for (int i = 0; i < s.length(); i++) {
+    for (unsigned int i = 0; i < s.length(); i++) {
         if (isdigit(s[i])){
             buf[j] = s[i];
             j++;
@@ -265,6 +270,7 @@ void SynthesizeXRaysFromCT(NoduleSpecs nodule_spec, vector<vector<vector<Voxel *
     double voxel_z_dim,
     Coordinate *source){
 
+    cout << "Reached breakpoint2" << endl;
     cout << "Source at:" << "(" << source->x << "," << source->y << "," << source->z << ")" << endl;
 
     // TODO =====================
