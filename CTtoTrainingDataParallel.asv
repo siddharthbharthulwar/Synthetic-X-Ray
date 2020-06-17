@@ -37,10 +37,6 @@ mkdir(strcat('chestXRays',int2str(CTnum)));
 % read in the CT data
 [CTarrayOriginal, floatVoxelDims] = dicomHandler(CTFolderName);
 
-
-disp("size");
-disp(size(CTarrayOriginal));
-
 if write_ct
     % write CT to text file
     dlmwrite(strcat('textCTs/CT_',int2str(CTnum),'.txt'),CTarrayOriginal);
@@ -50,29 +46,13 @@ CTarrayOriginal = CTarrayOriginal - 1000;
 %CTarrayOriginal(CTarrayOriginal > 500) = NaN;
 %CTarrayOriginal = rot90(CTarrayOriginal, 3);
 
-%function call below:
-
-for yindex = 1:233
-    MY = squeeze(CTarrayOriginal(yindex,:,:));
-    imshow(MY);
-end
-
-CTarrayRotated = rot90(squeeze(CTarrayOriginal(1,:, :)));
-
-disp("rotated initial dim: ");
-disp(size(CTarrayRotated));
+CTarrayRotated = squeeze(CTarrayOriginal(1, :, :));
 
 for zindex = 2:233
-    MZ = rot90(squeeze(CTarrayOriginal(zindex, :, :)));
+    CTarrayRotated = cat(3, CTarrayRotatsqueeze(CTarrayOriginal(zindex,:, :));
+    imshow(rot90(MZ));
     disp(size(MZ));
-    imshow(MZ);
-    CTarrayRotated = cat(1, CTarrayRotated, MZ);
 end
-
-CTarrayOriginal = CTarrayRotated;
-
-dicomViewer(CTarrayOriginal, 233, 0);
-dicomViewer(CTarrayRotated, 233, 0);
 
 CTarrayOriginal = fillmissing(CTarrayOriginal, 'linear');
 

@@ -42,8 +42,6 @@ for i = 1:maxSN
     
     if i > 2
         x=dirlist(i).name;
-        disp("x = ");
-        disp(x);
         info = dicominfo(strcat(folderName,x));
         dArr(slicesPos == info.SliceLocation,:,:) = uint16(dicomread(strcat(folderName,x)));
     end
