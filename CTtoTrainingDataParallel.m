@@ -43,7 +43,15 @@ if write_ct
 end
 
 CTarrayOriginal = CTarrayOriginal - 1000;
-CTarrayOriginal(CTarrayOriginal > 500) = NaN;
+%CTarrayOriginal(CTarrayOriginal > 500) = NaN;
+%CTarrayOriginal = rot90(CTarrayOriginal, 3);
+
+for zindex = 1:233
+    MZ = squeeze(CTarrayOriginal(zindex,:, :));
+    imshow(rot90(MZ));
+    disp(size(MZ));
+end
+
 CTarrayOriginal = fillmissing(CTarrayOriginal, 'linear');
 
 CTarrayOriginal((0.1707) * (CTarrayOriginal / 1000 + 1) > 0.5) = 0;
@@ -204,18 +212,19 @@ im = get(im, 'CData');
 im = 255 - im;
 im = flip(im, 1);
 im = mat2gray(im);
-im = imresize(im, [256, 256]);
+im = imresize(im, [2048, 2048]);
 
 % gamma correction with gamma=2.5 and regular histogram equalization
 % im = imadjust(im, [0 1],[0 1], 2.5);
-% im = histeq(im, 256);
+% im = histeq(im, 2048);
 
 % gamma correction with gamma=2.0 and contrast-limited adaptive histogram equalization
-im = imadjust(im,[0 1], [0 1], 2);
+im = imadjust(im,[0 1], [0 1], 1);
 im = adapthisteq(im);
+%THESE LINES CHANGED
 
 imshow(im, [0, 1], 'Border', 'tight');
-set(gcf, 'Units', 'pixels', 'Position', [0 0 256/2 256/2]);
+set(gcf, 'Units', 'pixels', 'Position', [0 0 2048/2 2048/2]);
 set(gcf, 'PaperPositionMode', 'auto');
 img = getframe(gcf);
 if xraynum % nodule xrays
