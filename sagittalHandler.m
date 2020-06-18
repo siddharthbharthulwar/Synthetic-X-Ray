@@ -1,5 +1,5 @@
 %turns the dicom files into a 3D array that represents the CT data
-function [CTarray, voxelDims] = dicomHandler(folderName)
+function [CTarray, voxelDims] = sagittalHandler(folderName)
 
 dirlist = dir(folderName);
 
@@ -43,7 +43,7 @@ for i = 1:maxSN
     if i > 2
         x=dirlist(i).name;
         info = dicominfo(strcat(folderName,x));
-        dArr(slicesPos == info.SliceLocation,:,:) = uint16(dicomread(strcat(folderName,x)));
+        dArr(slicesPos == info.SliceLocation,:,:) = rot90(uint16(dicomread(strcat(folderName,x))));
     end
     
 end

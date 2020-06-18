@@ -10,7 +10,8 @@
 
 % readNPY.m
 % readNPYheader.m
-% dicomHandler.m
+% coronalHandler.m
+% sagittalHandler.m
 
 % positions_0.txt (etc.)
 % chestCT0 folder (etc.)
@@ -35,7 +36,7 @@ end
 mkdir(strcat('chestXRays',int2str(CTnum)));
 
 % read in the CT data
-[CTarrayOriginal, floatVoxelDims] = dicomHandler(CTFolderName);
+[CTarrayOriginal, floatVoxelDims] = coronalHandler(CTFolderName);
 
 
 disp("size");
@@ -52,27 +53,27 @@ CTarrayOriginal = CTarrayOriginal - 1000;
 
 %function call below:
 
-for yindex = 1:233
-    MY = squeeze(CTarrayOriginal(yindex,:,:));
-    imshow(MY);
-end
-
-CTarrayRotated = rot90(squeeze(CTarrayOriginal(1,:, :)));
-
-disp("rotated initial dim: ");
-disp(size(CTarrayRotated));
-
-for zindex = 2:233
-    MZ = rot90(squeeze(CTarrayOriginal(zindex, :, :)));
-    disp(size(MZ));
-    imshow(MZ);
-    CTarrayRotated = cat(1, CTarrayRotated, MZ);
-end
-
-CTarrayOriginal = CTarrayRotated;
-
-dicomViewer(CTarrayOriginal, 233, 0);
-dicomViewer(CTarrayRotated, 233, 0);
+% for yindex = 1:233
+%     MY = squeeze(CTarrayOriginal(yindex,:,:));
+%     imshow(MY);
+% end
+% 
+% CTarrayRotated = rot90(squeeze(CTarrayOriginal(1,:, :)));
+% 
+% disp("rotated initial dim: ");
+% disp(size(CTarrayRotated));
+% 
+% for zindex = 2:233
+%     MZ = rot90(squeeze(CTarrayOriginal(zindex, :, :)));
+%     disp(size(MZ));
+%     imshow(MZ);
+%     CTarrayRotated = cat(1, CTarrayRotated, MZ);
+% end
+% 
+% CTarrayOriginal = CTarrayRotated;
+% 
+% dicomViewer(CTarrayOriginal, 233, 0);
+% dicomViewer(CTarrayRotated, 233, 0);
 
 CTarrayOriginal = fillmissing(CTarrayOriginal, 'linear');
 
