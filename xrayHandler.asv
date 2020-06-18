@@ -1,8 +1,0 @@
-function xrayHandler(CTFolderName)
-
-CTtoTrainingDataParallel(CTFolderName, 'positions_0.txt');
-CTtoTrainingDataParallel(CTFolderName, 'positions_0.txt');
-CTtoTrainingDataParallel('chestCT0/volume2/', 'positions_0.txt');
-CTtoTrainingDataParallel('chestCT0/volume2/', 'positions_0.txt');
-
-end
