@@ -1,28 +1,12 @@
-% Copyright (C) 2018-2019
+% Original Authors:
 % Abhishek Moturu, moturuab@cs.toronto.edu
 % Alex Chang, le.chang@mail.utoronto.ca
 
-% creates nodules, inserts them into CT data, and makes PARALLEL X-Rays
+% Modified by:
+% Siddharth Bharthulwar, siddharth.bharthulwar@colorado.edu
 
-% must have the following files in the same folder:
 
-% random_shape_generator.py
-
-% readNPY.m
-% readNPYheader.m
-% coronalHandler.m
-% sagittalHandler.m
-
-% positions_0.txt (etc.)
-% chestCT0 folder (etc.)
-
-% to run, type into the console: CTtoTrainingDataParallel(...);
-% CTFolderName is the folder containing the CT slices files
-% specificationsFileName is the file that contains nodule positions
-
-% CTtoTrainingDataParallel('chestCT0/I/NVFRWCBT/5O4VNQBN/', 'positions_0.txt');
-
-function CTtoTrainingDataParallel(CTFolderName, specificationsFileName)
+function CTtoTrainingDataParallel(CTFolderName, specificationsFileName, rotation)
 warning('off','all');
 write_ct = 0;
 write_nodule = 0;
@@ -30,13 +14,13 @@ if exist('numpy_nodules', 'dir')
     rmdir('numpy_nodules','s');
 end
 CTnum = str2num(CTFolderName(end)); %#ok<ST2NM>
-if exist(strcat('chestXRays',int2str(CTnum)), 'dir')
-    rmdir(strcat('chestXRays',int2str(CTnum)),'s');
-end
+% if exist(strcat('chestXRays',int2str(CTnum)), 'dir')
+%     rmdir(strcat('chestXRays',int2str(CTnum)),'s');
+% end
 mkdir(strcat('chestXRays',int2str(CTnum)));
 
 % read in the CT data
-[CTarrayOriginal, floatVoxelDims] = coronalHandler(CTFolderName);
+[CTarrayOriginal, floatVoxelDims] = dicomHandler(CTFolderName, rotation);
 
 
 disp("size");
@@ -87,7 +71,7 @@ scaleFactor = double(floatVoxelDims(1)/floatVoxelDims(3));
 
 [projectionOriginal] = XRayMaker(CTarrayOriginal, zeros(2), leftTop, rightBottom, 1, floatVoxelDims(2));
 minimum = min(min(projectionOriginal));
-SaveXRay(projectionOriginal - minimum, 0, CTnum,0,0,0,0);
+SaveXRay(projectionOriginal - minimum, 0, CTnum,0,0,0,0, rotation);
 
 file = fopen(specificationsFileName);
 line = fgetl(file);
@@ -228,7 +212,7 @@ end
 
 end
 
-function SaveXRay(projection, xraynum, CTnum, nodulePosition, noduleDimension, noduleSize, noduleHU)
+function SaveXRay(projection, xraynum, CTnum, nodulePosition, noduleDimension, noduleSize, noduleHU, rotation)
 %image processing (colour inverting, scaling, flipping)
 im = imshow (projection * (1000), [0, 255]);
 im = get(im, 'CData');
@@ -242,8 +226,8 @@ im = imresize(im, [2048, 2048]);
 % im = histeq(im, 2048);
 
 % gamma correction with gamma=2.0 and contrast-limited adaptive histogram equalization
-im = imadjust(im,[0 1], [0 1], 1);
-im = adapthisteq(im);
+%im = imadjust(im,[0 1], [0 1], 1);
+%im = adapthisteq(im);
 %THESE LINES CHANGED
 
 imshow(im, [0, 1], 'Border', 'tight');
@@ -253,7 +237,7 @@ img = getframe(gcf);
 if xraynum % nodule xrays
     fileName = strcat('chestXRays', int2str(CTnum), '/Xray', int2str(xraynum), '_', int2str(nodulePosition(1)), '_', int2str(nodulePosition(2)), '_', int2str(nodulePosition(3)), '_', int2str(noduleDimension(1)), '_', int2str(noduleDimension(2)), '_', int2str(noduleDimension(3)), '_', strrep(num2str(noduleSize),'.','-'), '_', int2str(noduleHU));
 else % original xray
-    fileName = strcat('chestXRays', int2str(CTnum), '/Xray', int2str(xraynum));
+    fileName = strcat('chestXRays', int2str(CTnum), '/Xray', int2str(xraynum), int2str(rotation));
 end
 
 imwrite(img.cdata, [fileName, '.png']);
