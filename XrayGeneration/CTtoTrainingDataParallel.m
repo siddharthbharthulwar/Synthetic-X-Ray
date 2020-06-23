@@ -219,7 +219,7 @@ im = get(im, 'CData');
 im = 255 - im;
 im = flip(im, 1);
 im = mat2gray(im);
-im = imresize(im, [2048, 2048]);
+%im = imresize(im, [2048, 2048]);
 
 % gamma correction with gamma=2.5 and regular histogram equalization
 % im = imadjust(im, [0 1],[0 1], 2.5);
@@ -231,7 +231,7 @@ im = imadjust(im,[0 1], [0 1], 1);
 %THESE LINES CHANGED
 
 imshow(im, [0, 1], 'Border', 'tight');
-set(gcf, 'Units', 'pixels', 'Position', [0 0 2048/2 2048/2]);
+set(gcf, 'Units', 'pixels', 'Position', [0 0 512/2 512/2]);
 set(gcf, 'PaperPositionMode', 'auto');
 img = getframe(gcf);
 if xraynum % nodule xrays
