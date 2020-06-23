@@ -20,9 +20,9 @@
 % CTFolderName is the folder containing the CT slices files
 % specificationsFileName is the file that contains nodule positions
 
-% CTtoTrainingDataParallel('chestCT0/I/NVFRWCBT/5O4VNQBN/', 'positions_0.txt');
+% CTtoTrainingDataParallel('chestCT0/volume1/', 'positions_0.txt');
 
-function CTtoTrainingDataParallel(CTFolderName, specificationsFileName)
+function CTtoTrainingDataParallel(CTFolderName, specificationsFileName, rotation)
 warning('off','all');
 write_ct = 0;
 write_nodule = 0;
@@ -36,7 +36,7 @@ end
 mkdir(strcat('chestXRays',int2str(CTnum)));
 
 % read in the CT data
-[CTarrayOriginal, floatVoxelDims] = coronalHandler(CTFolderName);
+[CTarrayOriginal, floatVoxelDims] = dicomHandler(CTFolderName, rotation);
 
 
 disp("size");
@@ -87,7 +87,7 @@ scaleFactor = double(floatVoxelDims(1)/floatVoxelDims(3));
 
 [projectionOriginal] = XRayMaker(CTarrayOriginal, zeros(2), leftTop, rightBottom, 1, floatVoxelDims(2));
 minimum = min(min(projectionOriginal));
-SaveXRay(projectionOriginal - minimum, 0, CTnum,0,0,0,0);
+SaveXRay(projectionOriginal - minimum, 0, CTnum,0,0,0,0, rotation);
 
 file = fopen(specificationsFileName);
 line = fgetl(file);
@@ -106,10 +106,10 @@ noduleSizes = NaN(numPositions,1);
 file = fopen(specificationsFileName);
 fgetl(file);
 line = fgetl(file);
-xraynum = 1;
+xraynum = 0;
 while ischar(line)
     % read in data from file
-    disp(line);
+    %disp(line);
     line = str2num(strrep(line,',',' ')); %#ok<ST2NM>
     
     xraynum = xraynum + 1;
@@ -183,7 +183,9 @@ while ischar(line)
     rightBottom = [position_x + ceil(d1/2), position_z + ceil(d3/2)];
     
     [projection] = XRayMaker(CTarray, projectionOriginal, leftTop, rightBottom, 0, floatVoxelDims(2));
-    SaveXRay(projection - minimum, xraynum, CTnum, nodulePositions(xraynum,:), noduleDimensions(xraynum,:), noduleSizes(xraynum), noduleHUs(xraynum));
+    disp("rot");
+    disp(rotation);
+    SaveXRay(projection - minimum, xraynum, CTnum, nodulePositions(xraynum,:), noduleDimensions(xraynum,:), noduleSizes(xraynum), noduleHUs(xraynum), rotation);
     line = fgetl(file);
     %end
     
@@ -228,37 +230,35 @@ end
 
 end
 
-function SaveXRay(projection, xraynum, CTnum, nodulePosition, noduleDimension, noduleSize, noduleHU)
+function SaveXRay(projection, xraynum, CTnum, nodulePosition, noduleDimension, noduleSize, noduleHU, rotation)
 %image processing (colour inverting, scaling, flipping)
+disp("savexray func");
+disp(rotation);
+
 im = imshow (projection * (1000), [0, 255]);
 im = get(im, 'CData');
 im = 255 - im;
 im = flip(im, 1);
 im = mat2gray(im);
-%im = imresize(im, [2048, 2048]);
+im = imresize(im, [2048, 2048]);
 
 % gamma correction with gamma=2.5 and regular histogram equalization
 % im = imadjust(im, [0 1],[0 1], 2.5);
- %im = histeq(im, 512);
+% im = histeq(im, 2048);
 
 % gamma correction with gamma=2.0 and contrast-limited adaptive histogram equalization
 im = imadjust(im,[0 1], [0 1], 1);
-<<<<<<< HEAD:XrayGeneration/CTtoTrainingDataParallel.m
-%im = adapthisteq(im);
-=======
 im = adapthisteq(im);
->>>>>>> parent of 88a74fc... add function for all four views:CTtoTrainingDataParallel.m
 %THESE LINES CHANGED
 
 imshow(im, [0, 1], 'Border', 'tight');
-set(gcf, 'Units', 'pixels', 'Position', [0 0 512/2 512/2]);
+set(gcf, 'Units', 'pixels', 'Position', [0 0 2048/2 2048/2]);
 set(gcf, 'PaperPositionMode', 'auto');
 img = getframe(gcf);
-if xraynum % nodule xrays
-    fileName = strcat('chestXRays', int2str(CTnum), '/Xray', int2str(xraynum), '_', int2str(nodulePosition(1)), '_', int2str(nodulePosition(2)), '_', int2str(nodulePosition(3)), '_', int2str(noduleDimension(1)), '_', int2str(noduleDimension(2)), '_', int2str(noduleDimension(3)), '_', strrep(num2str(noduleSize),'.','-'), '_', int2str(noduleHU));
-else % original xray
-    fileName = strcat('chestXRays', int2str(CTnum), '/Xray', int2str(xraynum));
-end
+
+fileName = strcat('chestXRays', int2str(CTnum), '/Xray', int2str(xraynum), int2str(rotation / 90));
+disp(fileName);
+
 
 imwrite(img.cdata, [fileName, '.png']);
 end
