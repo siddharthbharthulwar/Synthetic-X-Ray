@@ -10,8 +10,7 @@
 
 % readNPY.m
 % readNPYheader.m
-% coronalHandler.m
-% sagittalHandler.m
+% dicomHandler.m
 
 % positions_0.txt (etc.)
 % chestCT0 folder (etc.)
@@ -24,7 +23,6 @@
 
 function CTtoTrainingDataParallel(CTFolderName, specificationsFileName, rotation)
 warning('off','all');
-write_ct = 0;
 write_nodule = 0;
 if exist('numpy_nodules', 'dir')
     rmdir('numpy_nodules','s');
@@ -41,11 +39,6 @@ mkdir(strcat('chestXRays',int2str(CTnum)));
 
 disp("size");
 disp(size(CTarrayOriginal));
-
-if write_ct
-    % write CT to text file
-    dlmwrite(strcat('textCTs/CT_',int2str(CTnum),'.txt'),CTarrayOriginal);
-end
 
 CTarrayOriginal = CTarrayOriginal - 1000;
 %CTarrayOriginal(CTarrayOriginal > 500) = NaN;
@@ -87,7 +80,7 @@ scaleFactor = double(floatVoxelDims(1)/floatVoxelDims(3));
 
 [projectionOriginal] = XRayMaker(CTarrayOriginal, zeros(2), leftTop, rightBottom, 1, floatVoxelDims(2));
 minimum = min(min(projectionOriginal));
-SaveXRay(projectionOriginal - minimum, 0, CTnum,0,0,0,0, rotation);
+SaveXRay(projectionOriginal - minimum, 0, CTnum, rotation);
 
 file = fopen(specificationsFileName);
 line = fgetl(file);
@@ -230,10 +223,8 @@ end
 
 end
 
-function SaveXRay(projection, xraynum, CTnum, nodulePosition, noduleDimension, noduleSize, noduleHU, rotation)
+function SaveXRay(projection, xraynum, CTnum, rotation)
 %image processing (colour inverting, scaling, flipping)
-disp("savexray func");
-disp(rotation);
 
 im = imshow (projection * (1000), [0, 255]);
 im = get(im, 'CData');
@@ -256,8 +247,10 @@ set(gcf, 'Units', 'pixels', 'Position', [0 0 2048/2 2048/2]);
 set(gcf, 'PaperPositionMode', 'auto');
 img = getframe(gcf);
 
-fileName = strcat('chestXRays', int2str(CTnum), '/Xray', int2str(xraynum), int2str(rotation / 90));
+fileName = strcat('chestXRays', '/Xray', int2str(xraynum), int2str(rotation));
 disp(fileName);
+disp("rot");
+disp(rotation);
 
 
 imwrite(img.cdata, [fileName, '.png']);
