@@ -28,10 +28,10 @@ if exist('numpy_nodules', 'dir')
     rmdir('numpy_nodules','s');
 end
 CTnum = str2num(CTFolderName(end)); %#ok<ST2NM>
-if exist(strcat('chestXRays',int2str(CTnum)), 'dir')
-    rmdir(strcat('chestXRays',int2str(CTnum)),'s');
+if ~exist(strcat('chestXRays',int2str(CTnum)), 'dir')
+    mkdir(strcat('chestXRays',int2str(CTnum)));
 end
-mkdir(strcat('chestXRays',int2str(CTnum)));
+
 
 % read in the CT data
 [CTarrayOriginal, floatVoxelDims] = dicomHandler(CTFolderName, rotation);
@@ -247,7 +247,8 @@ set(gcf, 'Units', 'pixels', 'Position', [0 0 2048/2 2048/2]);
 set(gcf, 'PaperPositionMode', 'auto');
 img = getframe(gcf);
 
-fileName = strcat('chestXRays', '/Xray', int2str(xraynum), int2str(rotation));
+fileName = strcat('chestXRays', '/Xray', int2str(xraynum));
+fileName = strcat(fileName, int2str(rotation));
 disp(fileName);
 disp("rot");
 disp(rotation);
