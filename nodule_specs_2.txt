@@ -1,0 +1,3 @@
+xraynumber,positions(3),size(3),size(cm),HU
+0,Nan,Nan,Nan,Nan,Nan,Nan,Nan,Nan
+,

@@ -6,6 +6,8 @@ import os
 import pydicom as dicom
 import scipy.ndimage
 import numpy as np
+import matplotlib.animation as animation
+
 
 def load_scan(path):
 
@@ -96,8 +98,25 @@ def createXRay(volumePath, angle):
 
     ls = np.array(ls)
 
-    plt.imshow(np.rot90(np.squeeze(ls), 2), cmap = 'gist_gray')
+    return np.rot90(np.squeeze(ls), 2)
+
+def volumeRotationAnimation(volumePath):
+
+    b = get_pixels_hu(load_scan(volumePath))
+    ls = []
+
+    for i in range(0, 359):
+
+        print(i)
+        gg = plt.imshow(createXRay(volumePath, i), cmap = 'gray')
+        ls.append([gg])
+
+    fig = plt.figure()
+
+    ani = animation.ArtistAnimation(fig, ls, interval = 50, blit = True, repeat_delay = 3000)
+
     plt.show()
 
-createXRay('XrayGeneration/chestCT0/volume2/', 90)
+
+volumeRotationAnimation('chestCT0/volume2/')
 

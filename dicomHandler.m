@@ -19,7 +19,6 @@ for i = 1:maxSN
     if i > 2
         x = dirlist(i).name;
         %disp(x);
-        disp(i);
     end
 
 end
@@ -28,7 +27,6 @@ for i = 1:maxSN
     
     if i > 2
         x=dirlist(i).name;
-        %disp(strcat(folderName, x));
         info = dicominfo(strcat(folderName,x));
         slicesPos(place) = info.SliceLocation;
         place = place + 1;

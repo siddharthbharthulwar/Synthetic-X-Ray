@@ -1,25 +1,11 @@
-% Copyright (C) 2018-2019
+% Original Authors: 
+
+%Copyright (C) 2018-2019
 % Abhishek Moturu, moturuab@cs.toronto.edu
 % Alex Chang, le.chang@mail.utoronto.ca
 
-% creates nodules, inserts them into CT data, and makes PARALLEL X-Rays
-
-% must have the following files in the same folder:
-
-% random_shape_generator.py
-
-% readNPY.m
-% readNPYheader.m
-% dicomHandler.m
-
-% positions_0.txt (etc.)
-% chestCT0 folder (etc.)
-
-% to run, type into the console: CTtoTrainingDataParallel(...);
-% CTFolderName is the folder containing the CT slices files
-% specificationsFileName is the file that contains nodule positions
-
-% CTtoTrainingDataParallel('chestCT0/volume1/', 'positions_0.txt');
+%Script Modified by:
+%Siddharth Bharthulwar, siddharth.bharthulwar@colorado.edu
 
 function CTtoTrainingDataParallel(CTFolderName, specificationsFileName, rotation)
 warning('off','all');
@@ -27,9 +13,10 @@ write_nodule = 0;
 if exist('numpy_nodules', 'dir')
     rmdir('numpy_nodules','s');
 end
-CTnum = str2num(CTFolderName(end)); %#ok<ST2NM>
-if ~exist(strcat('chestXRays',int2str(CTnum)), 'dir')
-    mkdir(strcat('chestXRays',int2str(CTnum)));
+CTnum = str2num(CTFolderName(end-1)); %#ok<ST2NM>
+if ~exist(strcat('CXR/', int2str(CTnum)), 'dir')
+    disp(strcat('CXR/',int2str(CTnum)));
+    mkdir(strcat('CXR/',int2str(CTnum)'));
 end
 
 
@@ -247,7 +234,7 @@ set(gcf, 'Units', 'pixels', 'Position', [0 0 2048/2 2048/2]);
 set(gcf, 'PaperPositionMode', 'auto');
 img = getframe(gcf);
 
-fileName = strcat('chestXRays', '/Xray', int2str(xraynum));
+fileName = strcat('CXR', '/', int2str(CTnum), '/', int2str(xraynum));
 fileName = strcat(fileName, int2str(rotation));
 disp(fileName);
 disp("rot");
