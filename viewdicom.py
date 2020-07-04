@@ -13,7 +13,15 @@ from skimage import measure, morphology
 # Load the scans in given folder path
 def load_scan(path):
 
-    slices = [dicom.read_file(path + '/' + s) for s in os.listdir(path)]
+    slices = []
+
+    for s in os.listdir(path):
+
+        if (s[-3: ] == 'dcm'):
+
+            slices.append(dicom.read_file(path + '/' + s))
+
+    #slices = [dicom.read_file(path + '/' + s) for s in os.listdir(path)]
     slices.sort(key = lambda x: float(x.ImagePositionPatient[2]))
     try:
         slice_thickness = np.abs(slices[0].ImagePositionPatient[2] - slices[1].ImagePositionPatient[2])
@@ -41,6 +49,7 @@ def get_pixels_hu(slices):
         
         intercept = slices[slice_number].RescaleIntercept
         slope = slices[slice_number].RescaleSlope
+
         
         if slope != 1:
             image[slice_number] = slope * image[slice_number].astype(np.float64)
@@ -142,6 +151,13 @@ def segment_lung_mask(image, fill_lung_structures=True):
     return binary_image
 
 
+def returnNumSlices(pathStr):
+
+    first_patient = load_scan(pathStr)
+    first_patient_pixels = get_pixels_hu(first_patient)
+
+    print(first_patient_pixels.shape[0])
+
 def viewVolume(pathStr):
 
     patients = os.listdir(pathStr)
@@ -179,7 +195,8 @@ def viewVolume(pathStr):
 
     plt.show()
 
-
+'''
 pt = r"chestCT0\volume2"
 
 viewVolume(pt)
+'''

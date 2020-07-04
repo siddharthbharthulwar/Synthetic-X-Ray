@@ -2,7 +2,7 @@
 function [CTarray, voxelDims] = dicomHandler(folderName, rotation)
 
 dirlist = dir(folderName);
-
+disp(dirlist);
 maxSN = length(dirlist);
 info = dicominfo(strcat(folderName,dirlist(10).name));
 
