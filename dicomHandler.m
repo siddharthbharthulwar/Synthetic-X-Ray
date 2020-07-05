@@ -2,7 +2,6 @@
 function [CTarray, voxelDims] = dicomHandler(folderName, rotation)
 
 dirlist = dir(folderName);
-disp(dirlist);
 maxSN = length(dirlist);
 info = dicominfo(strcat(folderName,dirlist(10).name));
 
@@ -13,15 +12,6 @@ slicesPos = zeros(maxSN,1)+empty;
 
 place = 1;
 
-
-for i = 1:maxSN
-    
-    if i > 2
-        x = dirlist(i).name;
-        %disp(x);
-    end
-
-end
 
 for i = 1:maxSN
     
@@ -40,8 +30,9 @@ for i = 1:maxSN
     
     if i > 2
         x=dirlist(i).name;
-        info = dicominfo(strcat(folderName,x));
+        info = dicominfo(strcat(folderName,x));            
         dArr(slicesPos == info.SliceLocation,:,:) = rot90(uint16(dicomread(strcat(folderName,x))), rotation);
+            
     end
     
 end
