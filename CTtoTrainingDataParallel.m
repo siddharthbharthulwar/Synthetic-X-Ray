@@ -13,11 +13,14 @@ write_nodule = 0;
 if exist('numpy_nodules', 'dir')
     rmdir('numpy_nodules','s');
 end
-CTnum = str2num(CTFolderName(end-1)); %#ok<ST2NM>
-if ~exist(strcat('CXR/', int2str(CTnum)), 'dir')
-    disp(strcat('CXR/',int2str(CTnum)));
-    mkdir(strcat('CXR/',int2str(CTnum)'));
+
+CTstr = CTFolderName(end-4:end);
+if ~exist(strcat('CXR/', CTstr), 'dir')
+    disp(strcat('CXR/', CTstr));
+    mkdir(strcat('CXR/', CTstr));
 end
+CTnum = str2num(CTFolderName(end-1)); %#ok<ST2NM>
+
 
 
 % read in the CT data
@@ -28,32 +31,6 @@ disp("size");
 disp(size(CTarrayOriginal));
 
 CTarrayOriginal = CTarrayOriginal - 1000;
-%CTarrayOriginal(CTarrayOriginal > 500) = NaN;
-%CTarrayOriginal = rot90(CTarrayOriginal, 3);
-
-%function call below:
-
-% for yindex = 1:233
-%     MY = squeeze(CTarrayOriginal(yindex,:,:));
-%     imshow(MY);
-% end
-% 
-% CTarrayRotated = rot90(squeeze(CTarrayOriginal(1,:, :)));
-% 
-% disp("rotated initial dim: ");
-% disp(size(CTarrayRotated));
-% 
-% for zindex = 2:233
-%     MZ = rot90(squeeze(CTarrayOriginal(zindex, :, :)));
-%     disp(size(MZ));
-%     imshow(MZ);
-%     CTarrayRotated = cat(1, CTarrayRotated, MZ);
-% end
-% 
-% CTarrayOriginal = CTarrayRotated;
-% 
-% dicomViewer(CTarrayOriginal, 233, 0);
-% dicomViewer(CTarrayRotated, 233, 0);
 
 CTarrayOriginal = fillmissing(CTarrayOriginal, 'linear');
 
@@ -67,7 +44,7 @@ scaleFactor = double(floatVoxelDims(1)/floatVoxelDims(3));
 
 [projectionOriginal] = XRayMaker(CTarrayOriginal, zeros(2), leftTop, rightBottom, 1, floatVoxelDims(2));
 minimum = min(min(projectionOriginal));
-SaveXRay(projectionOriginal - minimum, 0, CTnum, rotation);
+SaveXRay(projectionOriginal - minimum, CTstr, rotation);
 
 file = fopen(specificationsFileName);
 line = fgetl(file);
@@ -165,7 +142,7 @@ while ischar(line)
     [projection] = XRayMaker(CTarray, projectionOriginal, leftTop, rightBottom, 0, floatVoxelDims(2));
     disp("rot");
     disp(rotation);
-    SaveXRay(projection - minimum, xraynum, CTnum, nodulePositions(xraynum,:), noduleDimensions(xraynum,:), noduleSizes(xraynum), noduleHUs(xraynum), rotation);
+    SaveXRay(projection - minimum, xraynum, CTstr, nodulePositions(xraynum,:), noduleDimensions(xraynum,:), noduleSizes(xraynum), noduleHUs(xraynum), rotation);
     line = fgetl(file);
     %end
     
@@ -210,7 +187,7 @@ end
 
 end
 
-function SaveXRay(projection, xraynum, CTnum, rotation)
+function SaveXRay(projection, CTstr, rotation)
 %image processing (colour inverting, scaling, flipping)
 
 im = imshow (projection * (1000), [0, 255]);
@@ -234,7 +211,7 @@ set(gcf, 'Units', 'pixels', 'Position', [0 0 2048/2 2048/2]);
 set(gcf, 'PaperPositionMode', 'auto');
 img = getframe(gcf);
 
-fileName = strcat('CXR', '/', int2str(CTnum), '/', int2str(xraynum));
+fileName = strcat('CXR', '\', CTstr);
 fileName = strcat(fileName, int2str(rotation));
 disp(fileName);
 disp("rot");
