@@ -8,18 +8,20 @@
 %Siddharth Bharthulwar, siddharth.bharthulwar@colorado.edu
 
 function CTtoTrainingDataParallel(CTFolderName, specificationsFileName, rotation)
+
 warning('off','all');
 write_nodule = 0;
 if exist('numpy_nodules', 'dir')
     rmdir('numpy_nodules','s');
 end
 
-CTstr = CTFolderName(end-4:end);
+disp(CTFolderName);
+CTstr = extractBetween(CTFolderName, 52, 55);
 if ~exist(strcat('CXR/', CTstr), 'dir')
     disp(strcat('CXR/', CTstr));
     mkdir(strcat('CXR/', CTstr));
 end
-CTnum = str2num(CTFolderName(end-1)); %#ok<ST2NM>
+CTnum = 0;
 
 
 
@@ -204,6 +206,7 @@ im = imresize(im, [2048, 2048]);
 % gamma correction with gamma=2.0 and contrast-limited adaptive histogram equalization
 im = imadjust(im,[0 1], [0 1], 1);
 im = adapthisteq(im);
+im = rot90(im, 2);
 %THESE LINES CHANGED
 
 imshow(im, [0, 1], 'Border', 'tight');
@@ -211,12 +214,11 @@ set(gcf, 'Units', 'pixels', 'Position', [0 0 2048/2 2048/2]);
 set(gcf, 'PaperPositionMode', 'auto');
 img = getframe(gcf);
 
-fileName = strcat('CXR', '\', CTstr);
-fileName = strcat(fileName, int2str(rotation));
-disp(fileName);
-disp("rot");
-disp(rotation);
+fileName = strcat('CXR/', char(CTstr), '/', char(int2str(rotation)), '.png');
+
+disp("ctstr");
+disp(class(CTstr));
 
 
-imwrite(img.cdata, [fileName, '.png']);
+imwrite(img.cdata, fileName);
 end

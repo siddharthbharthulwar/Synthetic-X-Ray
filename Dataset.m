@@ -3,6 +3,7 @@ function Dataset(CTRootName)
 dirlist = dir(CTRootName);
 maxSN = size(dirlist);
 
+
 for i = 1:maxSN
     
     x = dirlist(i).name;
@@ -24,9 +25,10 @@ for i = 1:maxSN
             slices_temp_size = size(finalDir);
             
             dcm_slices_num = (slices_temp_size(1));
+            
             if dcm_slices_num > 170
                 
-                disp(strcat(subPathName, "\", subsubPathName, "\"));
+                xrayHandler(strcat(subPathName, "\", subsubPathName, "\"));
 
             end
         end
