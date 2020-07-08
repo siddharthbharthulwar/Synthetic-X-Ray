@@ -25,14 +25,48 @@ def isFlipped(path): #if image needs to be flipped, this returns true
 
         return True
 
-def flip180(path):
+def isFlipped2(path):
 
     img = cv.imread(path, cv.IMREAD_GRAYSCALE)
-    return cv.rotate(img, cv.ROTATE_180)
 
+    fig = plt.figure()
+    plt.imshow(img, cmap = 'gray')
+    plt.title(path)
+
+    plt.draw()
+    plt.waitforbuttonpress(0) # this will wait for indefinite time
+    plt.close(fig)
+
+    val = input("F for Flip, S for no Flip")
+
+    if (val == 'F'):
+
+        return 1
+
+    elif (val == 'D'):
+
+        return 3
+
+    else:
+
+        return 2
+
+def flip180(path, bool):
+
+    img = cv.imread(path, cv.IMREAD_GRAYSCALE)
+    img = cv.rotate(img, cv.ROTATE_180)
+    if (bool):
+        cv.imwrite(path, img)
+    else:
+
+        plt.imshow(img, cmap = 'gray')
+        plt.title(path)
+        plt.show()
+'''
 path = r"D:\Documents\GitHub\GitHub\Synthetic-X-Ray\CXR\0002\0.png"
 
 if (isFlipped(path)):
 
     plt.imshow(flip180(path))
     plt.show()
+'''
