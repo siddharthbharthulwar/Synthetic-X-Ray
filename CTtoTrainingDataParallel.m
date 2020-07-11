@@ -23,8 +23,6 @@ if ~exist(strcat('CXR/', CTstr), 'dir')
 end
 CTnum = 0;
 
-
-
 % read in the CT data
 [CTarrayOriginal, floatVoxelDims] = dicomHandler(CTFolderName, rotation);
 

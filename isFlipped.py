@@ -39,11 +39,13 @@ def isFlipped2(path):
 
     val = input("F for Flip, S for no Flip")
 
-    if (val == 'F'):
+    print(val)
+
+    if (val == 'f'):
 
         return 1
 
-    elif (val == 'D'):
+    elif (val == 'd'):
 
         return 3
 
