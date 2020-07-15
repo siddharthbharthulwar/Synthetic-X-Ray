@@ -2,6 +2,7 @@ import os
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+import shutil
 
 def isFlipped2(path):
 
@@ -51,7 +52,7 @@ def move(path, outpath):
 root = 'CXR'
 
 removed = []
-flipped = []
+flippedlist = []
 normal = []
 
 for path, subdirs, files in os.walk(root):
@@ -74,12 +75,14 @@ for path, subdirs, files in os.walk(root):
 
                     if (flipped == 1):
                         
-                        flip180(os.path.join(subpath, sname), True, finalpath)
-                        flipped.append(subpath)
+                        ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
+                        ff1 = cv.rotate(ff1, cv.ROTATE_180)
+                        cv.imwrite(finalpath, ff1)
+                
+                        flippedlist.append(subpath)
 
                     elif (flipped == 3):
 
-                        os.rmdir(subpath)
                         removed.append(subpath)
 
                     else:
@@ -93,9 +96,11 @@ for path, subdirs, files in os.walk(root):
                     
                     if (flipped == 1):
 
-                        flip180(os.path.join(subpath, sname), True, finalpath)
+                        ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
+                        ff1 = cv.rotate(ff1, cv.ROTATE_180)
+                        cv.imwrite(finalpath, ff1)
 
-                    else:
+                    elif (flipped != 3):
 
                         move(os.path.join(subpath, sname), finalpath)
 
@@ -105,9 +110,11 @@ for path, subdirs, files in os.walk(root):
 
                     if (flipped == 1):
 
-                        flip180(os.path.join(subpath, sname), True, finalpath)
+                        ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
+                        ff1 = cv.rotate(ff1, cv.ROTATE_180)
+                        cv.imwrite(finalpath, ff1)
 
-                    else:
+                    elif (flipped != 3):
 
                         move(os.path.join(subpath, sname), finalpath)
 
@@ -117,9 +124,11 @@ for path, subdirs, files in os.walk(root):
                 
                     if (flipped == 1):
 
-                        flip180(os.path.join(subpath, sname), True, finalpath)
+                        ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
+                        ff1 = cv.rotate(ff1, cv.ROTATE_180)
+                        cv.imwrite(finalpath, ff1)
                     
-                    else:
+                    elif (flipped != 3):
 
                         move(os.path.join(subpath, sname), finalpath)
 
@@ -128,4 +137,7 @@ for path, subdirs, files in os.walk(root):
 
                 #os.rmdir(subpath)
 
+print(flippedlist)
+print(normal)
+print(removed)
             
