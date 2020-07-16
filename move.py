@@ -1,20 +1,6 @@
 import cv2 as cv
 import os
 import shutil
-'''
-path = r"D:\Documents\School\2020-21\CT\LIDC-IDRI"
-
-source = r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0001"
-destination = r"D:\Documents\GitHub\GitHub\Synthetic-X-Ray\Data\Out"
-
-dest = shutil.move(source, destination)
-
-print("After moving file")
-print(os.listdir(path))
-
-print("Destination Path", dest)
-'''
-
 
 path = r"D:\Documents\School\2020-21\CT\LIDC-IDRI"
 
