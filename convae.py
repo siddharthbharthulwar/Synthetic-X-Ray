@@ -50,14 +50,25 @@ view1 = np.reshape(view1, (len(view1), 1024, 1024, 1))
 view2 = np.reshape(view2, (len(view2), 1024, 1024, 1)) 
 view3 = np.reshape(view3, (len(view3), 1024, 1024, 1))           
 
-input_0 = Input(shape = (1024, 1024, 1))
+input_img = Input(shape=(1024, 1024, 1))    # adapt this if using 'channels_first' image data format
 
-x = Conv2D(16, (3, 3), activation='relu', padding='same')(input_0)
+x = Conv2D(16, (3, 3), activation='relu', padding='same')(input_img)
 x = MaxPooling2D((2, 2), padding='same')(x)
-x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
+x = Conv2D(32, (3, 3), activation='relu', padding='same')(input_img)
 x = MaxPooling2D((2, 2), padding='same')(x)
-x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
+x = Conv2D(96, (3, 3), activation='relu', padding='same')(input_img)
+x = MaxPooling2D((2, 2), padding='same')(x)
+x = Conv2D(96, (3, 3), activation='relu', padding='same')(x)
+x = MaxPooling2D((2, 2), padding='same')(x)
+x = Conv2D(96, (3, 3), activation='relu', padding='same')(x)
+x = MaxPooling2D((2, 2), padding='same')(x)
+x = Conv2D(96, (3, 3), activation='relu', padding='same')(x)
+x = MaxPooling2D((2, 2), padding='same')(x)
+x = Conv2D(96, (3, 3), activation='relu', padding='same')(x)
 encoded = MaxPooling2D((2, 2), padding='same')(x)
+
+encoder = Model(input_img, encoded)
+
 
 # at this point the representation is (4, 4, 8), i.e. 128-dimensional
 
@@ -65,30 +76,29 @@ x = Conv2D(8, (3, 3), activation='relu', padding='same')(encoded)
 x = UpSampling2D((2, 2))(x)
 x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
 x = UpSampling2D((2, 2))(x)
-x = Conv2D(16, (3, 3), activation='relu')(x)
+x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
+x = UpSampling2D((2, 2))(x)
+x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
+x = UpSampling2D((2, 2))(x)
+x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
 x = UpSampling2D((2, 2))(x)
 decoded = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
 
-autoencoder = Model(input_0, decoded)
-autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
+autoencoder = Model(input_img, decoded)
+autoencoder.summary()
 
-autoencoder.fit(view0, view0, epochs=30, batch_size=16, shuffle=True, validation_data=(view0, view0), verbose=1)
+x_train = np.reshape(view0, (len(view0), 1024, 1024, 1))    # adapt this if using 'channels_first' image data format
+y_train = np.reshape(view1, (len(view1), 1024, 1024, 1))    # adapt this if using 'channels_first' image data format
 
-decoded_imgs = autoencoder.predict(view0)
+# open a terminal and start TensorBoard to read logs in the autoencoder subdirectory
+# tensorboard --logdir=autoencoder
+autoencoder.compile(optimizer='adam', loss = 'mse')
+autoencoder.fit(x_train, y_train, epochs=41, batch_size=4, shuffle=True)
+print("model has been fit")
+# take a look at the reconstructed digits
+print("past showing and saving")
+autoencoder.save('autoencoder.h5')
+print("autoencoder has been saved")
 
-n = 10
-plt.figure(figsize=(10, 4), dpi=100)
-for i in range(n):
-    # display original
-    ax = plt.subplot(2, n, i + 1)
-    plt.imshow(view0[i].reshape(28, 28))
-    plt.gray()
-    ax.set_axis_off()
+del autoencoder
 
-    # display reconstruction
-    ax = plt.subplot(2, n, i + n + 1)
-    plt.imshow(decoded_imgs[i].reshape(28, 28))
-    plt.gray()
-    ax.set_axis_off()
-
-plt.show()

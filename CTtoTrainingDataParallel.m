@@ -8,15 +8,16 @@
 %Siddharth Bharthulwar, siddharth.bharthulwar@colorado.edu
 
 function CTtoTrainingDataParallel(CTFolderName, specificationsFileName, rotation)
-
+CTFolderName = strcat(CTFolderName, '/');
 warning('off','all');
 write_nodule = 0;
 if exist('numpy_nodules', 'dir')
     rmdir('numpy_nodules','s');
 end
 
-disp(CTFolderName);
 CTstr = extractBetween(CTFolderName, 52, 55);
+CTstr = string(CTstr);
+disp(CTstr);
 if ~exist(strcat('CXR/', CTstr), 'dir')
     disp(strcat('CXR/', CTstr));
     mkdir(strcat('CXR/', CTstr));

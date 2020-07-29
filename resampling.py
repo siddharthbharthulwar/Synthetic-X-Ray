@@ -10,7 +10,18 @@ from numpy import save
 
 def load_scan(path):
 
-    slices = [dicom.read_file(path + '/' + s) for s in os.listdir(path)]
+    dirs = os.listdir(path)
+    newdirs = []
+
+    for s in dirs:
+
+        if os.path.isfile(os.path.join(path, s)):
+
+            newdirs.append(s)
+
+
+
+    slices = [dicom.read_file(path + '/' + s) for s in newdirs]
     slices.sort(key = lambda x: float(x.ImagePositionPatient[2]))
     try:
         slice_thickness = np.abs(slices[0].ImagePositionPatient[2] - slices[1].ImagePositionPatient[2])
@@ -46,6 +57,8 @@ def get_pixels_hu(slices):
     
     return np.array(image, dtype=np.int16)
 
+
+
 def resample(path):
 
     array = get_pixels_hu(load_scan(path))
@@ -75,12 +88,23 @@ def compare(path):
     plt.title(downed.shape)
     plt.show()
 
+with open("dirs.txt") as fp:
 
+    line = fp.readline()
+    while line:
+        pt = line.strip()
+        resampled = resample(pt)
+        np.save(os.path.join(r"Data\Out", pt[51:55] + ".npy"), resampled)
+        print(pt[51:55])
+        line = fp.readline()
+            
+
+'''
 
 for file in os.listdir(r"Data\Out_Old"):
 
     resampled = resample(os.path.join(r"Data\Out_Old", file))
     np.save(os.path.join(r"Data\Out", file + ".npy"), resampled)
-    print(file)
-
+    #print(file)
+'''
     

@@ -156,7 +156,7 @@ def returnNumSlices(pathStr):
     first_patient = load_scan(pathStr)
     first_patient_pixels = get_pixels_hu(first_patient)
 
-    print(first_patient_pixels.shape[0])
+    return (first_patient_pixels.shape[0])
 
 def viewVolume(pathStr):
 

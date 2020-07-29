@@ -68,14 +68,14 @@ def radonShow(img, angle):
     projections = radon(image, theta=[angle])
     plt.plot(projections);
     plt.title("Projections at\n0 degrees")
-    plt.xlabel("Projection axis");
-    plt.ylabel("Intensity");
+    plt.xlabel("Projection axis")
+    plt.ylabel("Intensity")
 
     projections = radon(image)
     plt.subplot(223)
-    plt.title("Radon transform\n(Sinogram)");
-    plt.xlabel("Projection axis");
-    plt.ylabel("Intensity");
+    plt.title("Radon transform\n(Sinogram)")
+    plt.xlabel("Projection axis")
+    plt.ylabel("Intensity")
     plt.imshow(projections)
 
     reconstruction = iradon(projections)
@@ -118,5 +118,5 @@ def volumeRotationAnimation(volumePath):
     plt.show()
 
 
-volumeRotationAnimation('chestCT0/volume2/')
+#volumeRotationAnimation('chestCT0/volume2/')
 
