@@ -19,8 +19,6 @@ def load_scan(path):
 
             newdirs.append(s)
 
-
-
     slices = [dicom.read_file(path + '/' + s) for s in newdirs]
     slices.sort(key = lambda x: float(x.ImagePositionPatient[2]))
     try:
