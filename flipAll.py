@@ -1,10 +1,10 @@
 import os
-import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+import cv2 as cv
 import shutil
 
-def isFlipped2(path):
+def isFlipped(path):
 
     img = cv.imread(path, cv.IMREAD_GRAYSCALE)
 
@@ -13,36 +13,34 @@ def isFlipped2(path):
     plt.title(path)
 
     plt.draw()
-    plt.waitforbuttonpress(0) # this will wait for indefinite time
+    plt.waitforbuttonpress(0)
     plt.close(fig)
 
-    val = input("F for Flip, S for no Flip")
-
+    val = input("F: Flip")
     print(val)
 
     if (val == 'f'):
 
-        return 1
-
-    elif (val == 'd'):
-
-        return 3
+        return True
 
     else:
 
-        return 2
+        return False
 
-def flip180(path, bool, outpath):
+def testslice(array):
 
-    img = cv.imread(path, cv.IMREAD_GRAYSCALE)
-    img = cv.rotate(img, cv.ROTATE_180)
-    if (bool):
-        cv.imwrite(path, img)
-    else:
+    plt.imshow(array[:, 100, :], cmap = 'gray')
+    plt.show()
 
-        plt.imshow(img, cmap = 'gray')
-        plt.title(path)
-        plt.show()
+def flip_ct(array):
+
+    flipped = np.rot90(array, k = 2, axes = (2, 0))
+    return flipped
+
+def flip_xr(array):
+
+    flipped = np.rot90(array, k = 2)
+    return flipped
 
 def move(path, outpath):
 
@@ -51,21 +49,20 @@ def move(path, outpath):
 
 root = 'CXR'
 
-removed = []
 flippedlist = []
 normal = []
 
 for path, subdirs, files in os.walk(root):
     for name in subdirs:
-        subpath = os.path.join(root, name)
+        subpath = os.path.join(root ,name)
         for spath, ssubdirs, sfiles in os.walk(subpath):
 
-            flipped = 0
+            flipped = False
             for bname in sfiles:
 
                 if (bname == '0.png'):
 
-                    flipped = isFlipped2(os.path.join(subpath, bname))
+                    flipped = isFlipped(os.path.join(subpath, bname))
 
             for sname in sfiles:
 
@@ -73,7 +70,7 @@ for path, subdirs, files in os.walk(root):
 
                     finalpath = os.path.join('Data/In/0/', name + '.png')
 
-                    if (flipped == 1):
+                    if (flipped):
                         
                         ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
                         ff1 = cv.rotate(ff1, cv.ROTATE_180)
@@ -81,63 +78,59 @@ for path, subdirs, files in os.walk(root):
                 
                         flippedlist.append(subpath)
 
-                    elif (flipped == 3):
+                        ct = np.load(os.path.join('Data\Out', name + '.npy'))
+                        ct_flipped = flip_ct(ct)
 
-                        removed.append(subpath)
+                        np.save(os.path.join('Data\Out', name), ct_flipped)
 
                     else:
 
                         normal.append(subpath)
-                        move(os.path.join(subpath, sname), finalpath)
+                        shutil.copy(os.path.join(subpath, sname), finalpath)
 
                 elif (sname == '1.png'):
 
                     finalpath = (os.path.join('Data/In/1/', name + '.png'))
                     
-                    if (flipped == 1):
+                    if (flipped):
 
                         ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
                         ff1 = cv.rotate(ff1, cv.ROTATE_180)
                         cv.imwrite(finalpath, ff1)
 
-                    elif (flipped != 3):
+                    else:
 
-                        move(os.path.join(subpath, sname), finalpath)
+                        shutil.copy(os.path.join(subpath, sname), finalpath)
 
                 elif (sname == '2.png'):
 
                     finalpath = (os.path.join('Data/In/2/', name + '.png'))
 
-                    if (flipped == 1):
+                    if (flipped):
 
                         ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
                         ff1 = cv.rotate(ff1, cv.ROTATE_180)
                         cv.imwrite(finalpath, ff1)
 
-                    elif (flipped != 3):
+                    else:
 
-                        move(os.path.join(subpath, sname), finalpath)
+                        shutil.copy(os.path.join(subpath, sname), finalpath)
 
                 elif (sname == '3.png'):
 
                     finalpath = (os.path.join('Data/In/3/', name + '.png'))
                 
-                    if (flipped == 1):
+                    if (flipped):
 
                         ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
                         ff1 = cv.rotate(ff1, cv.ROTATE_180)
                         cv.imwrite(finalpath, ff1)
                     
-                    elif (flipped != 3):
+                    else:
 
-                        move(os.path.join(subpath, sname), finalpath)
+                        shutil.copy(os.path.join(subpath, sname), finalpath)
 
                     #flip180(os.path.join(subpath, name, "placeholder"), False)
 
 
-                #os.rmdir(subpath)
-
-print(flippedlist)
-print(normal)
-print(removed)
-            
+#write crawler to manually inspect all of them 
