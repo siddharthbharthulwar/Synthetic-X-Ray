@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "C:\\Users\\siddh\\Anaconda3\\envs\\SVS\\python.exe"
+    "python.pythonPath": "C:\\Users\\siddh\\Anaconda3\\envs\\SVS\\python.exe",
+    "git.ignoreLimitWarning": true
 }
