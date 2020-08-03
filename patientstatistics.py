@@ -44,3 +44,6 @@ for path, subdirs, files in os.walk(root):
     patient_identifier_index +=1
     
 print(len(patients))
+
+
+
