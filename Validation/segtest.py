@@ -10,18 +10,16 @@ import matplotlib.animation as animation
 from skimage import measure, morphology
 
 
+INPUT_FOLDER = r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0009\01-01-2000-07045\3000538.000000-29210/"
+
+patients = os.listdir(INPUT_FOLDER)
+patients.sort()
+
+
 # Load the scans in given folder path
 def load_scan(path):
 
-    slices = []
-
-    for s in os.listdir(path):
-
-        if (s[-3: ] == 'dcm'):
-
-            slices.append(dicom.read_file(path + '/' + s))
-
-    #slices = [dicom.read_file(path + '/' + s) for s in os.listdir(path)]
+    slices = [dicom.read_file(path + '/' + s) for s in os.listdir(path)]
     slices.sort(key = lambda x: float(x.ImagePositionPatient[2]))
     try:
         slice_thickness = np.abs(slices[0].ImagePositionPatient[2] - slices[1].ImagePositionPatient[2])
@@ -49,7 +47,6 @@ def get_pixels_hu(slices):
         
         intercept = slices[slice_number].RescaleIntercept
         slope = slices[slice_number].RescaleSlope
-
         
         if slope != 1:
             image[slice_number] = slope * image[slice_number].astype(np.float64)
@@ -58,6 +55,19 @@ def get_pixels_hu(slices):
         image[slice_number] += np.int16(intercept)
     
     return np.array(image, dtype=np.int16)
+
+
+
+first_patient = load_scan(INPUT_FOLDER)
+first_patient_pixels = get_pixels_hu(first_patient)
+plt.hist(first_patient_pixels.flatten(), bins=80, color='c')
+plt.xlabel("Hounsfield Units (HU)")
+plt.ylabel("Frequency")
+plt.show()
+
+# Show some slice in the middle
+plt.imshow(first_patient_pixels[80], cmap=plt.cm.gray)
+plt.show()
 
 
 def resample(image, scan, new_spacing=[1,1,1]):
@@ -74,6 +84,10 @@ def resample(image, scan, new_spacing=[1,1,1]):
     
     return image, new_spacing
 
+
+pix_resampled, spacing = resample(first_patient_pixels, first_patient, [1,1,1])
+print("Shape before resampling\t", first_patient_pixels.shape)
+print("Shape after resampling\t", pix_resampled.shape)
 
 def plot_3d(image, threshold=-300):
     
@@ -150,77 +164,21 @@ def segment_lung_mask(image, fill_lung_structures=True):
  
     return binary_image
 
+segmented_lungs = segment_lung_mask(pix_resampled, False)
+segmented_lungs_fill = segment_lung_mask(pix_resampled, True)
 
-def returnNumSlices(pathStr):
-
-    first_patient = load_scan(pathStr)
-    first_patient_pixels = get_pixels_hu(first_patient)
-
-    return (first_patient_pixels.shape[0])
-
-def viewVolume(pathStr):
-
-    patients = os.listdir(pathStr)
-    patients.sort()
-
-    first_patient = load_scan(pathStr)
-    first_patient_pixels = get_pixels_hu(first_patient)
-    plt.hist(first_patient_pixels.flatten(), bins=80, color='c')
-    plt.xlabel("Hounsfield Units (HU)")
-    plt.ylabel("Frequency")
-    plt.show()
-
-
-    pix_resampled, spacing = resample(first_patient_pixels, first_patient, [1,1,1])
-    print("Shape before resampling\t", first_patient_pixels.shape)
-    print("Shape after resampling\t", pix_resampled.shape)
-
-    
-    segmented_lungs = segment_lung_mask(pix_resampled, False)
-    segmented_lungs_fill = segment_lung_mask(pix_resampled, True)
-
-    #plot_3d(segmented_lungs_fill - segmented_lungs, 0)
-    arr = segmented_lungs - segmented_lungs_fill
-
-    ims = []
-
-    for im in arr:
-
-        gg = plt.imshow(im, cmap = 'gray')
-        ims.append([gg])
-
-    fig = plt.figure()
-
-    ani = animation.ArtistAnimation(fig, ims, interval = 50, blit = True, repeat_delay = 2000)
-
-    plt.show()
-
-
-def view3DSegmentation(image):
-
-    segmented_lungs = segment_lung_mask(image, False)
-    segmented_lungs_fill = segment_lung_mask(image, True)
-
-    arr = segmented_lungs - segmented_lungs_fill
-
-    ims = []
-
-    for im in arr:
-
-        gg = plt.imshow(im, cmap = 'gray')
-        ims.append([gg])
-
-    fig = plt.figure()
-
-    ani = animation.ArtistAnimation(fig, ims, interval = 50, blit = True, repeat_delay = 500)
-
-    plt.show()
-
-
-array = np.load(r'Data\Out_New\0002.npy')
-segmented_lungs = segment_lung_mask(array, False)
-segmented_lungs_fill = segment_lung_mask(array, True)
-
+plot_3d(segmented_lungs_fill - segmented_lungs, 0)
 arr = segmented_lungs - segmented_lungs_fill
 
-plot_3d(arr, 0)
+ims = []
+
+for im in arr:
+
+    gg = plt.imshow(im, cmap = 'gray')
+    ims.append([gg])
+
+fig = plt.figure()
+
+ani = animation.ArtistAnimation(fig, ims, interval = 50, blit = True, repeat_delay = 2000)
+
+plt.show()
