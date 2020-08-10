@@ -94,7 +94,7 @@ class PairedDataset:
 
         self.y_train = np.array(self.y_train).astype('float64')
 
-        
+
     def view_pair(self, index):
 
         f = plt.figure()
@@ -129,7 +129,14 @@ class PairedDataset:
 
             print("Error: dataset has not been initialized yet")
 
-
+    def prepare(self):
+        
+        self.x_train = np.reshape(self.x_train, (len(self.x_train), 256, 256, 1))
+        self.y_train = np.reshape(self.y_train, (len(self.y_train), 128, 128, 128, 1))
+        print("Shape of X: {}".format(self.x_train.shape))
+        print("Shape of Y: {}".format(self.y_train.shape))
 
 pd = PairedDataset(r'Data\In_New\0', r'Data\Out_New', 50)
 pd.view_pair(15)
+
+
