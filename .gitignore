@@ -135,3 +135,5 @@ dmypy.json
 *.asv
 *.png
 *.npy
+Networks/256/AE/model_arch.json
+Networks/256/AE/model_weights.h5

@@ -83,7 +83,7 @@ class PairedDataset:
 
         self.x_train = np.array(self.x_train).astype('float64')
         self.x_train /= np.amax(self.x_train)
-
+        '''
         for i in range(0, len(self.y_train)):
 
             item = self.y_train[i]
@@ -91,7 +91,7 @@ class PairedDataset:
             normalized = normalize(item)
             self.y_train[i] = normalized
             print("Normalized item {} with max: {} and min: {}".format(i, np.amax(self.y_train[i]), np.amin(self.y_train[i])))
-
+        '''
         self.y_train = np.array(self.y_train).astype('float64')
 
 
@@ -136,7 +136,34 @@ class PairedDataset:
         print("Shape of X: {}".format(self.x_train.shape))
         print("Shape of Y: {}".format(self.y_train.shape))
 
+    def normalize(self, disp_bool):
+
+
+        for i in range(0, len(self.x_train)):
+
+            item = self.x_train[i]
+            std_x = np.std(item)
+            mean_x = np.mean(item)
+            normalized = (item - mean_x) / std_x
+            print("Max: {} Min: {} Mean: {} STD {} Item: {}".format(np.amax(normalized), np.amin(normalized), np.mean(normalized), np.std(normalized), i))
+            if (disp_bool):
+                plt.imshow(normalized, cmap = 'gray')
+                plt.title(i)
+                plt.show()
+
+        for i in range(0, len(self.y_train)):
+
+            item = self.y_train[i]
+            std_y = np.std(item)
+            mean_y = np.mean(item)
+            normalized = (item - mean_y) / std_y
+            print("Max: {} Min: {} Mean: {} STD {} Item: {}".format(np.amax(normalized), np.amin(normalized), np.mean(normalized), np.std(normalized), i))
+            if (disp_bool):
+                plt.imshow(normalized[64], cmap = 'gray')
+                plt.title(i)
+                plt.show()
+
 pd = PairedDataset(r'Data\In_New\0', r'Data\Out_New', 50)
-pd.view_pair(15)
+pd.normalize(True)
 
 
