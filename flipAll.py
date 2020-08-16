@@ -54,6 +54,7 @@ normal = []
 
 for path, subdirs, files in os.walk(root):
     for name in subdirs:
+        print(name)
         subpath = os.path.join(root ,name)
         for spath, ssubdirs, sfiles in os.walk(subpath):
 
@@ -63,12 +64,28 @@ for path, subdirs, files in os.walk(root):
                 if (bname == '0.png'):
 
                     flipped = isFlipped(os.path.join(subpath, bname))
+                    if (flipped):
 
+                        flippedlist.append(name)
+                    else:
+
+                        normal.append(name)
+
+for path, subdirs, files in os.walk(root):
+    for name in subdirs:
+        print(name)
+        subpath = os.path.join(root ,name)
+        for spath, ssubdirs, sfiles in os.walk(subpath):
             for sname in sfiles:
 
                 if (sname == '0.png'):
 
                     finalpath = os.path.join('Data/In/0/', name + '.png')
+                    
+                    if name in flippedlist:
+                        flipped = True
+                    else:
+                        flipped = False
 
                     if (flipped):
                         
