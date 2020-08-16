@@ -47,7 +47,7 @@ def move(path, outpath):
     img = cv.imread(path, cv.IMREAD_GRAYSCALE)
     cv.imwrite(outpath, img)
 
-root = 'CXR'
+root = 'D:\Documents\GitHub\GitHub\Synthetic-X-Ray\Matlab_SXR\CXR'
 
 flippedlist = []
 normal = []
@@ -90,16 +90,17 @@ for path, subdirs, files in os.walk(root):
 
                 elif (sname == '1.png'):
 
-                    finalpath = (os.path.join('Data/In/1/', name + '.png'))
                     
                     if (flipped):
 
+                        finalpath = (os.path.join('Data/In/3/', name + '.png'))
                         ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
                         ff1 = cv.rotate(ff1, cv.ROTATE_180)
                         cv.imwrite(finalpath, ff1)
 
                     else:
 
+                        finalpath = (os.path.join('Data/In/1/', name + '.png'))
                         shutil.copy(os.path.join(subpath, sname), finalpath)
 
                 elif (sname == '2.png'):
@@ -118,16 +119,17 @@ for path, subdirs, files in os.walk(root):
 
                 elif (sname == '3.png'):
 
-                    finalpath = (os.path.join('Data/In/3/', name + '.png'))
                 
                     if (flipped):
-
+                        
+                        finalpath = (os.path.join('Data/In/1/', name + '.png'))
                         ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
                         ff1 = cv.rotate(ff1, cv.ROTATE_180)
                         cv.imwrite(finalpath, ff1)
                     
                     else:
-
+                        
+                        finalpath = (os.path.join('Data/In/3/', name + '.png'))
                         shutil.copy(os.path.join(subpath, sname), finalpath)
 
                     #flip180(os.path.join(subpath, name, "placeholder"), False)
