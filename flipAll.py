@@ -49,107 +49,185 @@ def move(path, outpath):
 
 root = 'D:\Documents\GitHub\GitHub\Synthetic-X-Ray\Matlab_SXR\CXR'
 
-flippedlist = []
-normal = []
 
-for path, subdirs, files in os.walk(root):
-    for name in subdirs:
-        print(name)
-        subpath = os.path.join(root ,name)
-        for spath, ssubdirs, sfiles in os.walk(subpath):
+def flip_all_scans(root):
 
-            flipped = False
-            for bname in sfiles:
+    flippedlist = []
+    normal = []
 
-                if (bname == '0.png'):
+    for path, subdirs, files in os.walk(root):
+        for name in subdirs:
+            print(name)
+            subpath = os.path.join(root ,name)
+            for spath, ssubdirs, sfiles in os.walk(subpath):
 
-                    flipped = isFlipped(os.path.join(subpath, bname))
-                    if (flipped):
+                flipped = False
+                for bname in sfiles:
 
-                        flippedlist.append(name)
-                    else:
+                    if (bname == '0.png'):
 
-                        normal.append(name)
+                        flipped = isFlipped(os.path.join(subpath, bname))
+                        if (flipped):
 
-for path, subdirs, files in os.walk(root):
-    for name in subdirs:
-        print(name)
-        subpath = os.path.join(root ,name)
-        for spath, ssubdirs, sfiles in os.walk(subpath):
-            for sname in sfiles:
+                            flippedlist.append(name)
+                        else:
 
-                if (sname == '0.png'):
+                            normal.append(name)
 
-                    finalpath = os.path.join('Data/In/0/', name + '.png')
+                        print("flipped: {}".format(len(flippedlist)))
+                        print("normal: {}".format(len(normal)))
+
+    for path, subdirs, files in os.walk(root):
+        for name in subdirs:
+            print(name)
+            subpath = os.path.join(root ,name)
+            for spath, ssubdirs, sfiles in os.walk(subpath):
+                for sname in sfiles:
+
+                    if (sname == '0.png'):
+
+                        finalpath = os.path.join('Data/In/0/', name + '.png')
+
+                        if name in flippedlist:
+                            flipped = True
+                        else:
+                            flipped = False
+
+                        if (flipped):
+                            
+                            ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
+                            ff1 = cv.rotate(ff1, cv.ROTATE_180)
+                            cv.imwrite(finalpath, ff1)
                     
-                    if name in flippedlist:
-                        flipped = True
-                    else:
-                        flipped = False
+                            flippedlist.append(subpath)
 
-                    if (flipped):
+                            ct = np.load(os.path.join('Data\Out', name + '.npy'))
+                            ct_flipped = flip_ct(ct)
+
+                            np.save(os.path.join('Data\Out', name), ct_flipped)
+
+                        else:
+
+                            normal.append(subpath)
+                            shutil.copy(os.path.join(subpath, sname), finalpath)
+
+                    elif (sname == '1.png'):
+
                         
-                        ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
-                        ff1 = cv.rotate(ff1, cv.ROTATE_180)
-                        cv.imwrite(finalpath, ff1)
-                
-                        flippedlist.append(subpath)
+                        if (flipped):
 
-                        ct = np.load(os.path.join('Data\Out', name + '.npy'))
-                        ct_flipped = flip_ct(ct)
+                            finalpath = (os.path.join('Data/In/3/', name + '.png'))
+                            ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
+                            ff1 = cv.rotate(ff1, cv.ROTATE_180)
+                            cv.imwrite(finalpath, ff1)
 
-                        np.save(os.path.join('Data\Out', name), ct_flipped)
+                        else:
 
-                    else:
+                            finalpath = (os.path.join('Data/In/1/', name + '.png'))
+                            shutil.copy(os.path.join(subpath, sname), finalpath)
 
-                        normal.append(subpath)
-                        shutil.copy(os.path.join(subpath, sname), finalpath)
+                    elif (sname == '2.png'):
 
-                elif (sname == '1.png'):
+                        finalpath = (os.path.join('Data/In/2/', name + '.png'))
+
+                        if (flipped):
+
+                            ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
+                            ff1 = cv.rotate(ff1, cv.ROTATE_180)
+                            cv.imwrite(finalpath, ff1)
+
+                        else:
+
+                            shutil.copy(os.path.join(subpath, sname), finalpath)
+
+                    elif (sname == '3.png'):
 
                     
-                    if (flipped):
-
-                        finalpath = (os.path.join('Data/In/3/', name + '.png'))
-                        ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
-                        ff1 = cv.rotate(ff1, cv.ROTATE_180)
-                        cv.imwrite(finalpath, ff1)
-
-                    else:
-
-                        finalpath = (os.path.join('Data/In/1/', name + '.png'))
-                        shutil.copy(os.path.join(subpath, sname), finalpath)
-
-                elif (sname == '2.png'):
-
-                    finalpath = (os.path.join('Data/In/2/', name + '.png'))
-
-                    if (flipped):
-
-                        ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
-                        ff1 = cv.rotate(ff1, cv.ROTATE_180)
-                        cv.imwrite(finalpath, ff1)
-
-                    else:
-
-                        shutil.copy(os.path.join(subpath, sname), finalpath)
-
-                elif (sname == '3.png'):
-
-                
-                    if (flipped):
+                        if (flipped):
+                            
+                            finalpath = (os.path.join('Data/In/1/', name + '.png'))
+                            ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
+                            ff1 = cv.rotate(ff1, cv.ROTATE_180)
+                            cv.imwrite(finalpath, ff1)
                         
-                        finalpath = (os.path.join('Data/In/1/', name + '.png'))
-                        ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
-                        ff1 = cv.rotate(ff1, cv.ROTATE_180)
-                        cv.imwrite(finalpath, ff1)
-                    
-                    else:
+                        else:
+                            
+                            finalpath = (os.path.join('Data/In/3/', name + '.png'))
+                            shutil.copy(os.path.join(subpath, sname), finalpath)
+
+                        #flip180(os.path.join(subpath, name, "placeholder"), False)
+
+def flip_individual_scan(root, num_str):
+
+    flipped = True
+    for path, subdirs, files in os.walk(root):
+        for name in subdirs:
+            if (name == num_str):
+                subpath = os.path.join(root ,name)
+                for spath, ssubdirs, sfiles in os.walk(subpath):
+                    for sname in sfiles:
+
+                        if (sname == '0.png'):
+
+                            finalpath = os.path.join('Data/In/0/', name + '.png')
+
+                            if (flipped):
+                                
+                                ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
+                                ff1 = cv.rotate(ff1, cv.ROTATE_180)
+                                cv.imwrite(finalpath, ff1)
                         
-                        finalpath = (os.path.join('Data/In/3/', name + '.png'))
-                        shutil.copy(os.path.join(subpath, sname), finalpath)
+                                ct = np.load(os.path.join('Data\Out', name + '.npy'))
+                                ct_flipped = flip_ct(ct)
 
-                    #flip180(os.path.join(subpath, name, "placeholder"), False)
+                                np.save(os.path.join('Data\Out', name), ct_flipped)
 
+                            else:
 
-#write crawler to manually inspect all of them 
+                                shutil.copy(os.path.join(subpath, sname), finalpath)
+
+                        elif (sname == '1.png'):
+
+                            
+                            if (flipped):
+
+                                finalpath = (os.path.join('Data/In/3/', name + '.png'))
+                                ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
+                                ff1 = cv.rotate(ff1, cv.ROTATE_180)
+                                cv.imwrite(finalpath, ff1)
+
+                            else:
+
+                                finalpath = (os.path.join('Data/In/1/', name + '.png'))
+                                shutil.copy(os.path.join(subpath, sname), finalpath)
+
+                        elif (sname == '2.png'):
+
+                            finalpath = (os.path.join('Data/In/2/', name + '.png'))
+
+                            if (flipped):
+
+                                ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
+                                ff1 = cv.rotate(ff1, cv.ROTATE_180)
+                                cv.imwrite(finalpath, ff1)
+
+                            else:
+
+                                shutil.copy(os.path.join(subpath, sname), finalpath)
+
+                        elif (sname == '3.png'):
+
+                        
+                            if (flipped):
+                                
+                                finalpath = (os.path.join('Data/In/1/', name + '.png'))
+                                ff1 = cv.imread(os.path.join(subpath, sname), cv.IMREAD_GRAYSCALE)
+                                ff1 = cv.rotate(ff1, cv.ROTATE_180)
+                                cv.imwrite(finalpath, ff1)
+                            
+                            else:
+                                
+                                finalpath = (os.path.join('Data/In/3/', name + '.png'))
+                                shutil.copy(os.path.join(subpath, sname), finalpath)
+
+flip_individual_scan(r'D:\Documents\GitHub\GitHub\Synthetic-X-Ray\Matlab_SXR\CXR', '0997')
