@@ -340,7 +340,7 @@ class PairedDatasetQuad: #dataset for double view neural network model
         self.x_train_0_files = os.listdir(in_path_0)
         self.x_train_1_files = os.listdir(in_path_1)
         self.x_train_2_files = os.listdir(in_path_2)
-        self.X_train_3_files = os.listdir(in_path_3)
+        self.x_train_3_files = os.listdir(in_path_3)
         self.y_train_files = os.listdir(out_path)
 
         for i in range(0, len(self.x_train_0_files)):
