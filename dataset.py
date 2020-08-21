@@ -130,12 +130,26 @@ class PairedDatasetSingle:
 
             print("Error: dataset has not been initialized yet")
 
-    def prepare(self):
-        
+    def prepare(self, num_train):
+
+        self.x_val = self.x_train[num_train: len(self.x_train)]
+        self.x_train = self.x_train[0:num_train]
+
+
+        self.y_val = self.y_train[num_train : len(self.y_train)]
+        self.y_train = self.y_train[0: num_train]
+
+
         self.x_train = np.reshape(self.x_train, (len(self.x_train), 1024, 1024, 1))
         self.y_train = np.reshape(self.y_train, (len(self.y_train), 128, 128, 128, 1))
-        print("Shape of X: {}".format(self.x_train.shape))
-        print("Shape of Y: {}".format(self.y_train.shape))
+
+        self.x_val = np.reshape(self.x_val, (len(self.x_val), 1024, 1024, 1))
+        self.y_val = np.reshape(self.y_val, (len(self.y_val), 128, 128, 128, 1))
+
+        print("Shape of X Train: {}".format(self.x_train.shape))
+        print("Shape of Y Train: {}".format(self.y_train.shape))
+        print("Shape of X Validation: {}".format(self.x_val.shape))
+        print("Shape of Y Validation: {}".format(self.y_val.shape))
 
 class PairedDatasetDouble: #dataset for double view neural network model
 
@@ -507,3 +521,6 @@ class PairedDatasetQuad: #dataset for double view neural network model
         print("Shape of X2: {}".format(self.x_train_2.shape))
         print("Shape of X3: {}".format(self.x_train_3.shape))
         print("Shape of Y: {}".format(self.y_train.shape))
+
+pd = PairedDatasetSingle('Data/In/0', 'Data/Out_New', 30)
+pd.prepare(29)
