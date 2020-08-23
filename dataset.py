@@ -183,8 +183,6 @@ class PairedDatasetDouble: #dataset for double view neural network model
         print("Length of x_train 1 files: {}".format(len(self.x_train_1_files)))
         print("Length of y_train files: {}".format(len(self.y_train_files)))
 
-        
-
         main_list = np.setdiff1d(self.x_train_0_files, self.y_train_files)
 
         for item in main_list:
@@ -521,6 +519,3 @@ class PairedDatasetQuad: #dataset for double view neural network model
         print("Shape of X2: {}".format(self.x_train_2.shape))
         print("Shape of X3: {}".format(self.x_train_3.shape))
         print("Shape of Y: {}".format(self.y_train.shape))
-
-pd = PairedDatasetSingle('Data/In/0', 'Data/Out_New', 30)
-pd.prepare(29)
