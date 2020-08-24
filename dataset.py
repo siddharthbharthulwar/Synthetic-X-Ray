@@ -69,6 +69,14 @@ class PairedDatasetSingle:
         self.x_train_paths = sorted(self.x_train_paths)
         self.y_train_paths = sorted(self.y_train_paths)
 
+        self.keys = []
+
+        for file in self.y_train_paths:
+
+            self.keys.append(file[0:4])
+
+        print("Length of keys: {}".format(len(self.keys)))
+
         if (filelimiter < 1 or filelimiter> len(self.x_train_paths)):
 
             filelimiter = len(self.x_train_paths)
@@ -151,32 +159,24 @@ class PairedDatasetSingle:
         print("Shape of X Validation: {}".format(self.x_val.shape))
         print("Shape of Y Validation: {}".format(self.y_val.shape))
 
-    def save_predictions(self, model, truth_out_dir, pred_out_dir, save_truths = False):
+    def save_data(self, model, truth_out_dir, pred_out_dir, save_truths = False):
 
-        self.model = model #tensorflow.keras or keras model
+        self.model = model #tensorflow.keras model
 
-        for i in range(0, self.x_val.shape[0]):
+        for i in range(0, len(self.keys)):
 
             input = np.reshape(self.x_train[i], (1, 1024, 1024, 1))
             output = model.predict(input)
             output = np.reshape(output, (128, 128, 128))
 
-            if (self.x_train_files[i] == self.y_train_files[i]):
+            if (save_truths):
 
-                num = self.x_train_files[i]
+                truth = np.reshape(self.y_train[i], (128, 128, 128))
+                np.save(os.path.join(truth_out_dir, self.keys[i]), truth)
 
-                if (save_truths):
-                    
-                    truth = np.reshape(truth, (128, 128, 128))
-                    np.save(os.path.join(truth_out_dir, num), truth)
-
-                np.save(os.path.join(pred_out_dir, num), output)
-
-            print(i)
-
-
-            
-
+            np.save(os.path.join(pred_out_dir, self.keys[i]), output)
+            print(self.keys[i])
+    
 class PairedDatasetDouble: #dataset for double view neural network model
 
     def __init__(self, in_path_0, in_path_1, out_path, filelimiter): #if filelimiter is -1 or > 943, unlimited.

@@ -7,6 +7,7 @@ import scipy.ndimage
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from skimage import measure, morphology
 import os
+from tensorflow.keras.models import model_from_json
 
 def extract_slice_mask(slice):
 
@@ -26,6 +27,117 @@ def extract_slice_mask(slice):
 
     mask = ma.masked_not_equal(labels_im, largest_index)
     return mask
+
+def extract_lung_mask(volume, size = 128):
+
+    slices = []
+
+    for i in range(0, size):
+
+        masked_slice = extract_slice_mask(volume[i])
+        slices.append(masked_slice)
+
+    slices = np.array(slices)
+    return slices
+
+
+class ValidationDataset:
+
+    def __init__(self, truth_out_dir, pred_out_dir, model_json_path, model_weights_path):
+        
+        with open(model_json_path, 'r') as f:
+
+            self.model = model_from_json(f.read())
+
+        self.model.load_weights(model_weights_path)
+
+        self.truth_dirs = os.listdir(truth_out_dir)
+        self.pred_dirs = os.listdir(pred_out_dir)
+
+        self.truths = []
+        self.preds = []
+
+        for file in self.truth_dirs:
+
+            if (file[-3:] == 'npy'):
+
+                array = np.load(os.path.join(self.truth_dirs, file))
+                self.truths.append(array)
+
+        for file in self.pred_dirs:
+
+            if (file[-3:] == 'npy'):
+
+                array = np.load(os.path.join(self.pred_dirs, file))
+                self.preds.append(array)
+
+    def view_pair(self, index):
+
+        truth = self.truths[index]
+        prediction = self.preds[index]
+
+        f = plt.figure()
+
+        plt.imshow(self.truths[index][64], cmap = 'gray')
+        plt.title("Truth {}".format(index))
+
+        plt.imshow(self.preds[index][64], cmap = 'gray')
+        plt.title("Pred {}".format(index))
+
+        plt.imshow(block = True)
+
+    def tpfp(self, index):
+
+        truth = self.truths[index]
+        prediction = self.preds[index]
+
+        h, w, l = truth.shape[0], truth.shape[1], truth.shape[2]
+
+        tp = np.zeros(truth.shape)
+        fp = np.zeros(truth.shape)
+        fn = np.zeros(truth.shape)
+        tn = np.zeros(truth.shape)
+
+        truth_mask = extract_lung_mask(truth)
+        pred_mask = extract_lung_mask(prediction)
+
+        for i in range(0, h):
+
+            for j in range(0, w):
+
+                for k in range(0, l):
+
+                    if (truth_mask[i, j, k] == 1 and pred_mask[i, j, k] == 1):
+
+                        tp[i, j, k] = 1
+
+                    elif (truth_mask[i, j, k] == 1 and pred_mask[i, j, k] == 0):
+
+                        fn[i, j, k] = 1
+
+                    elif (truth_mask[i, j, k] == 0 and pred_mask[i, j, k] == 1):
+
+                        fp[i, j, k] = 1
+
+                    else:
+
+                        tn[i, j, k] = 1
+
+        tp = ma.masked_values(tp * 100, 0)
+        fp = ma.masked_values(fp * 50, 0)
+        fn = ma.masked_values(fn, 0)
+
+        for i in range(0, h):
+
+            plt.imshow(tp[i], cmap = 'brg', vmin = 0.1) #green
+            plt.imshow(fp[i], cmap = 'brg', vmin = 0.1, vmax = 100) #red
+            plt.imshow(fn[i], cmap = 'brg', vmin = 0.1, vmax = 90) #blue
+            plt.title(str(i))
+            plt.show(block = True)
+
+'''
+
+
 
 class ValidationDataset:
 
@@ -54,6 +166,8 @@ class ValidationDataset:
             full_path = os.path.join(self.pred_path, item)
             arr = np.load(full_path)
             self.predictions.append(arr)
+
+        
 
         
     def view_pair(self, index):
@@ -136,7 +250,7 @@ def plot3d(array):
     for ii in range(0,360,1):
         ax.view_init(elev=10., azim=ii)
         plt.savefig("movie{}.png".format(ii))
-'''
+
 pd = PairedDatasetSingle('Data/In/0', 'Data/Out_New', 100)
 
 for item in pd.y_train:
