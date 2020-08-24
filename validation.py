@@ -6,15 +6,68 @@ import numpy.ma as ma
 import scipy.ndimage
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from skimage import measure, morphology
+import os
+
+def extract_slice_mask(slice):
+
+    ret, thresh = cv.threshold(slice, 0.1, 1, cv.THRESH_BINARY)
+    num_labels, labels_im, stats, centroids = cv.connectedComponentsWithStats(thresh.astype('uint8'))
+
+    max = stats[1, 4]
+    largest_index = 1
+
+    for k in np.delete(np.unique(labels_im), 0):
+
+        size = stats[k, 4]
+        if (size > max):
+
+            max = size
+            largest_index = k
+
+    mask = ma.masked_not_equal(labels_im, largest_index)
+    return mask
 
 class ValidationDataset:
 
-    def __init__(self):
+    def __init__(self, val_truth_path, val_pred_path):
+
+        self.truth_path = val_truth_path
+        self.pred_path = val_pred_path
+
+        self.truth_files = os.listdir(self.truth_path)
+        self.pred_files = os.listdir(self.pred_path)
+
+        print("Length of truth files: {}".format(len(self.truth_files)))
+        print("Length of prediction files: {}".format(len(self.pred_files)))
 
         self.truths = []
         self.predictions = []
 
+        for item in self.truth_files:
+
+            full_path = os.path.join(self.truth_path, item)
+            arr = np.load(full_path)
+            self.truths.append(arr)
+
+        for item in self.pred_files:
+
+            full_path = os.path.join(self.pred_path, item)
+            arr = np.load(full_path)
+            self.predictions.append(arr)
+
         
+    def view_pair(self, index):
+
+        f = plt.figure()
+        plt.imshow(self.truths[index][64], cmap = 'gray')
+        plt.title("Original CT {}".format(index))
+
+        plt.imshow(self.predictions[index][64], cmap = 'gray')
+        plt.title("Prediction CT {}".format(index))
+
+        plt.show(block = True)
+
+
 
 class ValidationPair:
 
@@ -61,24 +114,7 @@ class ValidationPair:
 
             plt.show(block = True)
 
-def extract_slice_mask(slice):
 
-    ret, thresh = cv.threshold(slice, 0.1, 1, cv.THRESH_BINARY)
-    num_labels, labels_im, stats, centroids = cv.connectedComponentsWithStats(thresh.astype('uint8'))
-
-    max = stats[1, 4]
-    largest_index = 1
-
-    for k in np.delete(np.unique(labels_im), 0):
-
-        size = stats[k, 4]
-        if (size > max):
-
-            max = size
-            largest_index = k
-
-    mask = ma.masked_not_equal(labels_im, largest_index)
-    return mask
 
 def plot3d(array):
 
