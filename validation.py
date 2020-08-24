@@ -135,6 +135,22 @@ class ValidationDataset:
             plt.title(str(i))
             plt.show(block = True)
 
+    def compare_histograms(self, index):
+
+        truth = self.truths[index]
+        prediction = self.preds[index]
+
+        fig, axs = plt.subplots(2, 2)
+        axs[0, 0].imshow(truth[64], cmap = 'gray')
+        axs[0, 0].set_title("Truth {}".format(index))
+        axs[0, 1].imshow(prediction[64], cmap = 'gray')
+        axs[0, 1].set_title("Prediction {}".format(index))
+        axs[1, 0].hist(truth.ravel(), bins = 400)
+        axs[1, 0].set_title("Hist of Truth")
+        axs[1, 1].hist(prediction.ravel(), bins = 400)
+        axs[1, 1].set_title("Hist of Pred")
+
+        plt.show(block = True)
 '''
 
 
