@@ -216,7 +216,7 @@ def view3DSegmentation(image):
 
     plt.show()
 
-
+'''
 array = np.load(r'Data\Out_New\0002.npy')
 segmented_lungs = segment_lung_mask(array, False)
 segmented_lungs_fill = segment_lung_mask(array, True)
@@ -224,3 +224,5 @@ segmented_lungs_fill = segment_lung_mask(array, True)
 arr = segmented_lungs - segmented_lungs_fill
 
 plot_3d(arr, 0)
+
+'''

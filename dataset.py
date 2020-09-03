@@ -231,6 +231,7 @@ class PairedDatasetDouble: #dataset for double view neural network model
         self.x_train_1_paths = []
         self.y_train_paths = []
 
+
         for item in os.listdir(in_path_0):
 
             if (item[-3: ] == 'png'):
@@ -252,6 +253,15 @@ class PairedDatasetDouble: #dataset for double view neural network model
         self.x_train_0_paths = sorted(self.x_train_0_paths)
         self.x_train_1_paths = sorted(self.x_train_1_paths)
         self.y_train_paths = sorted(self.y_train_paths)
+
+        self.keys = []
+
+        for file in self.y_train_paths:
+
+            self.keys.append(file[0:4])
+
+        print("Length of keys: {}".format(len(self.keys)))
+
 
         if (filelimiter < 1 or filelimiter> len(self.x_train_0_paths)):
 
@@ -332,6 +342,25 @@ class PairedDatasetDouble: #dataset for double view neural network model
         print("Shape of X0: {}".format(self.x_train_0.shape))
         print("Shape of X1: {}".format(self.x_train_1.shape))
         print("Shape of Y: {}".format(self.y_train.shape))
+
+    def save_data(self, model, truth_out_dir, pred_out_dir, save_truths = False):
+
+        self.model = model #tensorflow.keras model
+
+        for i in range(0, len(self.keys)):
+
+            input_0 = np.reshape(self.x_train_0[i], (1, 1024, 1024, 1))
+            input_1 = np.reshape(self.x_train_1[i], (1, 1024, 1024, 1))
+            output = model.predict([input_0, input_1])
+            output = np.reshape(output, (128, 128, 128))
+
+            if (save_truths):
+
+                truth = np.reshape(self.y_train[i], (128, 128, 128))
+                np.save(os.path.join(truth_out_dir, self.keys[i]), truth)
+
+            np.save(os.path.join(pred_out_dir, self.keys[i]), output)
+            print(self.keys[i])
 
 class PairedDatasetQuad: #dataset for double view neural network model
 
@@ -538,7 +567,7 @@ class PairedDatasetQuad: #dataset for double view neural network model
         self.x_train_0 = np.reshape(self.x_train_0, (len(self.x_train_0), 1024, 1024, 1))
         self.x_train_1 = np.reshape(self.x_train_1, (len(self.x_train_1), 1024, 1024, 1))
         self.x_train_2 = np.reshape(self.x_train_2, (len(self.x_train_2), 1024, 1024, 1))
-        self.x_train_3 = np.reshape(self.x_train_3, (len(selx.x_train_3), 1024, 1024, 1))
+        self.x_train_3 = np.reshape(self.x_train_3, (len(self.x_train_3), 1024, 1024, 1))
         self.y_train = np.reshape(self.y_train, (len(self.y_train), 128, 128, 128, 1))
         print("Shape of X0: {}".format(self.x_train_0.shape))
         print("Shape of X1: {}".format(self.x_train_1.shape))
