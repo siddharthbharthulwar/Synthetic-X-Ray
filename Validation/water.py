@@ -3,7 +3,7 @@ import numpy as np
 import math
 import pydicom
 
-def DICOMwaterequivalent(dicom_filename, threshold, window = False):
+def DICOMwaterequivalent(dicom_filename, threshold):
 
     # load DICOM image
     dicom_pydicom  = pydicom.read_file(dicom_filename)
@@ -43,60 +43,8 @@ def DICOMwaterequivalent(dicom_filename, threshold, window = False):
     water_equiv_area = 0.001 * roi_mean_hu * area + area
     water_equiv_circle_diam = 2.0 * math.sqrt(water_equiv_area/math.pi)
 
-    if window:
-        # map ww/wl to human-viewable image (view_img)
-        remap = lambda t: 255.0 * (1.0 * t - (window[1] - 0.5 * window[0])) / window[0] # create LUT function; window[0]: ww, window[1]: wl
-        view_img = np.array([remap(row) for row in dicom_img]) # rescale
-        view_img = np.clip(view_img, 0, 255) # limit to 8 bit
-        view_img = view_img.astype(np.uint8) # set color depth
-        view_img = cv2.cvtColor(view_img, cv2.COLOR_GRAY2RGB) # add RBG channels
+    return( area, equiv_circle_diam, water_equiv_area, water_equiv_circle_diam, hullarea, hullequiv)
 
-        # create overlay to draw on human-viewable image (to be added as transparent layer)
-        overlay_img = np.copy(view_img)
-
-        # draw contour 3px wide on overlay layer, merge layers with transparency
-        cv2.drawContours(overlay_img, [hull], -1, (0,255,255), 2, cv2.LINE_AA)
-        cv2.drawContours(overlay_img, [contour], -1, (0,255,0), 2, cv2.LINE_AA)
-        cv2.addWeighted(overlay_img, 0.40, view_img, 1 - 0.40, 0, view_img)
-        
-        # add text
-        cv2.putText(view_img, "patient:", (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 2, cv2.LINE_AA)
-        cv2.putText(view_img, "patient:", (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv2.LINE_AA)
-        cv2.putText(view_img, "{:.0f} mm^2, circle d = {:.0f} mm".format(area,equiv_circle_diam), (100,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 2, cv2.LINE_AA)
-        cv2.putText(view_img, "{:.0f} mm^2, circle d = {:.0f} mm".format(area,equiv_circle_diam), (100,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv2.LINE_AA)
-
-        cv2.putText(view_img, "water eq.:", (10,36), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 2, cv2.LINE_AA)
-        cv2.putText(view_img, "water eq.:", (10,36), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv2.LINE_AA)
-        cv2.putText(view_img, "{:.0f} mm^2, circle d = {:.0f} mm".format(water_equiv_area, water_equiv_circle_diam), (100,36), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 2, cv2.LINE_AA)
-        cv2.putText(view_img, "{:.0f} mm^2, circle d = {:.0f} mm".format(water_equiv_area, water_equiv_circle_diam), (100,36), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv2.LINE_AA)
-
-        cv2.putText(view_img, "hull:", (10,60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 2, cv2.LINE_AA)
-        cv2.putText(view_img, "hull:", (10,60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,200,200), 1, cv2.LINE_AA)
-        cv2.putText(view_img, "{:.0f} mm^2, circle d = {:.0f} mm".format(hullarea, hullequiv), (100,60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 2, cv2.LINE_AA)
-        cv2.putText(view_img, "{:.0f} mm^2, circle d = {:.0f} mm".format(hullarea, hullequiv), (100,60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,200,200), 1, cv2.LINE_AA)
-    else:
-        view_img = False
-
-    return( area, equiv_circle_diam, water_equiv_area, water_equiv_circle_diam, hullarea, hullequiv, view_img )
-'''
-if __name__ == "__main__":
-
-    import sys
-    try:
-        filename = sys.argv[1]
-        threshold = int(sys.argv[2])
-    except:
-        raise AttributeError('\n\nUsage:\n$ DICOMwaterequivalent.py filename threshold\nRead source code for details.')
-
-
-    result = DICOMwaterequivalent(filename, threshold, (1600,-400))
-
-    # cv2.imwrite('out.png', result[6]) # to write numpy image as file
-    print(result[0:6], flush=True)                # results[0:6] = (Aw, Dw, Ap, Dp, Aph, Dph)
-    cv2.imshow('DICOMwaterequivalent', result[6]) # results[6] = numpy image, press any key in graphical window to close
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-'''
 
 s = DICOMwaterequivalent(r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0008\01-01-2000-30141\3000549.000000-21954\1-104.dcm", -250, False)
 print(s)
