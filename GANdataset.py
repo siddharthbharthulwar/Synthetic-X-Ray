@@ -5,6 +5,14 @@ import matplotlib.animation as animation
 import os
 import cv2 as cv
 from random import randint
+from keras.layers import Input, Conv2D, MaxPooling2D, UpSampling2D, Conv3D, MaxPooling3D, UpSampling3D, Reshape, Flatten, Dense
+from keras.layers.merge import concatenate
+from keras.models import Model
+from keras.datasets import mnist
+from keras.callbacks import TensorBoard
+from keras import backend as K
+from keras.optimizers import Adam
+from keras.initializers import RandomNormal
 
 def normalize(array):
 
@@ -14,7 +22,7 @@ def normalize(array):
 
 class GANDatasetSingle:
 
-    def __init__(self, in_path, out_path, filelimiter): #if filelimiter is -1 or > 943, unlimited.
+    def __init__(self, in_path, out_path, filelimiter):
         
         self.in_path = in_path
         self.out_path = out_path
@@ -39,24 +47,6 @@ class GANDatasetSingle:
         main_list = np.setdiff1d(self.x_train_files, self.y_train_files)
 
         print("LENGTH OF MAIN LIST: {}".format(len(main_list)))
-
-        '''
-
-        for item in main_list:
-
-            if (item[0] != '.'):
-
-                if item in x_train_files:
-
-                    os.remove(os.path.join(in_path, item + ".png"))
-                
-                elif item in y_train_files:
-
-                    os.remove(os.path.join(out_path, item + ".npy"))
-
-        '''
-
-        # ^^ removing files present in one (x, y) and not other (x, y) to prevent dataset misalignment
 
         self.x_train_paths = []
         self.y_train_paths = []
@@ -110,40 +100,117 @@ class GANDatasetSingle:
         
         self.y_train = np.array(self.y_train).astype('float64')
 
+    def define_discriminator(self):
 
-    def view_pair(self, index):
+        input_img_1 = Input(shape=(128, 128, 128, 1))    # adapt this if using 'channels_first' image data format
+        input_img_2 = Input(shape = (1024, 1024, 1))
 
-        f = plt.figure()
+        x = Conv3D(64, (3, 3, 3), activation='relu', padding='same')(input_img_1)
+        x = MaxPooling3D((2, 2, 2), padding='same')(x)
+        x = Conv3D(128, (3, 3, 3), activation='relu', padding='same')(x)
+        x = MaxPooling3D((2, 2, 2), padding='same')(x)
+        x = Conv3D(256, (3, 3, 3), activation='relu', padding='same')(x)
+        x = MaxPooling3D((2, 2, 2), padding='same')(x)
+        x = Conv3D(512, (3, 3, 3), activation='relu', padding='same')(x)
+        x = MaxPooling3D((2, 2, 2), padding='same')(x)
+        x = Conv3D(1024, (3, 3, 3), activation='relu', padding='same')(x)
+        x = MaxPooling3D((2, 2, 2), padding='same')(x)
+        x = Conv3D(2048, (3, 3, 3), activation='relu', padding='same')(x)
+        x = MaxPooling3D((2, 2, 2), padding='same')(x)
+        x = Reshape((2, 2, 4096))(x)
 
-        f.add_subplot(1, 2, 1)
-        plt.imshow(self.x_train[index], cmap = 'gray')
-        plt.title('Radiograph of {}'.format(index))
-        f.add_subplot(1, 2, 2)
-        plt.imshow(self.y_train[index][64], cmap = 'gray')
-        plt.title("Tomography of {}".format(index))
-        plt.show(block = True)
+        y = Conv2D(32, (3, 3), activation = "relu", padding = 'same')(input_img_2)
+        y = MaxPooling2D((2, 2), padding = 'same')(y)
+        y = Conv2D(64, (3, 3), activation = "relu", padding = 'same')(y)
+        y = MaxPooling2D((2, 2), padding = 'same')(y)
+        y = Conv2D(128, (3, 3), activation = "relu", padding = 'same')(y)
+        y = MaxPooling2D((2, 2), padding = 'same')(y)
+        y = Conv2D(256, (3, 3), activation = "relu", padding = 'same')(y)
+        y = MaxPooling2D((2, 2), padding = 'same')(y)
+        y = Conv2D(512, (3, 3), activation = "relu", padding = 'same')(y)
+        y = MaxPooling2D((2, 2), padding = 'same')(y)
+        y = Conv2D(512, (3, 3), activation = "relu", padding = 'same')(y)
+        y = MaxPooling2D((2, 2), padding = 'same')(y)
+        y = Conv2D(1024, (3, 3), activation = "relu", padding = 'same')(y)
+        y = MaxPooling2D((2, 2), padding = 'same')(y)
+        y = Conv2D(2048, (3, 3), activation = "relu", padding = 'same')(y)
+        y = MaxPooling2D((2, 2), padding = 'same')(y)
+        y = Conv2D(4096, (3, 3), activation = "relu", padding = 'same')(y)
+        y = MaxPooling2D((2, 2), padding = 'same')(y)
 
-    def view_animation(self, index):
+        encoded = concatenate([x, y])
+        encoded = Reshape(target_shape=(32, 32, 32))(encoded)
+        encoded = Conv2D(16, (3, 3), activation = 'relu', padding = 'same')(encoded)
+        encoded = MaxPooling2D((2, 2), padding = 'same')(encoded)
+        encoded = Conv2D(1, (1, 1), activation = 'relu', padding = 'same')(encoded)
+        
+        discriminator = Model([input_img_2, input_img_1], encoded)
+        discriminator.summary()
 
-        if (self.y_train):
+        opt = Adam(learning_rate=0.0002, beta_1 = 0.5)
+        discriminator.compile(loss = 'binary_crossentropy', optimizer = opt, loss_weights = [0.5])
+        self.discriminator = discriminator
+        print("Discriminator created")
 
-            array = self.y_train[index]
+    def define_generator(self):
 
-            ims = []
+        input_img = Input((1024, 1024, 1))
 
-            for im in array:
+        init = RandomNormal(stddev = 0.02)
 
-                gg = plt.imshow(im, cmap = 'gray')
-                ims.append([gg])
+        x = Conv2D(32, (3, 3), activation='relu', padding='same')(input_img)
+        x = MaxPooling2D((2, 2), padding='same')(x)
+        x = Conv2D(64, (3, 3), activation='relu', padding='same')(x)
+        x = MaxPooling2D((2, 2), padding='same')(x)
+        x = Conv2D(128, (3, 3), activation='relu', padding='same')(x)
+        x = MaxPooling2D((2, 2), padding='same')(x)
+        x = Conv2D(256, (3, 3), activation='relu', padding='same')(x)
+        x = MaxPooling2D((2, 2), padding='same')(x)
+        x = Conv2D(512, (3, 3), activation='relu', padding='same')(x)
+        x = MaxPooling2D((2, 2), padding='same')(x)
+        x = Conv2D(1024, (3, 3), activation='relu', padding='same')(x)
+        x = MaxPooling2D((2, 2), padding='same')(x)
+        x = Conv2D(2048, (3, 3), activation='relu', padding='same')(x)
+        x = MaxPooling2D((2, 2), padding='same')(x)
+        x = Conv2D(4096, (3, 3), activation='relu', padding='same', kernel_initializer=init)(x)
+        encoded = MaxPooling2D((2, 2), padding='same')(x)
 
-            fig = plt.figure()
-            ani = animation.ArtistAnimation(fig, ims, interval = 50, blit = True)
-            plt.title(index)
-            plt.show()
+        encoded = Reshape((4, 4, 4, 1024))(encoded)
 
-        else:
+        x = Conv3D(512, (3, 3, 3), activation = 'relu', padding = 'same')(encoded)
+        x = UpSampling3D((2, 2, 2))(x)
 
-            print("Error: dataset has not been initialized yet")
+        x = Conv3D(256, (3, 3, 3), activation = 'relu', padding = 'same')(x)
+        x = UpSampling3D((2, 2, 2))(x)
+
+        x = Conv3D(128, (3, 3, 3), activation = 'relu', padding = 'same')(x)
+        x = UpSampling3D((2, 2, 2))(x)
+
+        x = Conv3D(64, (3, 3, 3), activation = 'relu', padding = 'same')(x)
+        x = UpSampling3D((2, 2, 2))(x)
+
+        x = Conv3D(32, (3, 3, 3), activation = 'relu', padding = 'same')(x)
+        x = UpSampling3D((2, 2, 2))(x)
+
+        decoded = Conv3D(1, (1, 1, 1), activation = 'relu', padding = 'same')(x)
+
+        generator = Model(input_img, decoded)
+        self.generator = generator
+        print("Generator created")
+
+    def make_gan(self):
+
+        self.discriminator.trainable = False
+
+        in_src = Input((1024, 1024, 1))
+
+        gen_out = self.generator(in_src)
+        dis_out = self.discriminator([in_src, gen_out])
+        model = Model(in_src, [dis_out, gen_out])
+
+        opt = Adam(lr = 0.00015, beta_1 = 0.5)
+        model.compile(loss = ['binary_crossentropy', 'mae'], optimizer = opt, loss_weights= [1, 100])
+        self.gan = model
 
     def prepare(self, num_train):
 
@@ -166,24 +233,6 @@ class GANDatasetSingle:
         print("Shape of X Validation: {}".format(self.x_val.shape))
         print("Shape of Y Validation: {}".format(self.y_val.shape))
 
-    def save_data(self, model, truth_out_dir, pred_out_dir, save_truths = False):
-
-        self.model = model #tensorflow.keras model
-
-        for i in range(0, len(self.keys)):
-
-            input = np.reshape(self.x_train[i], (1, 1024, 1024, 1))
-            output = model.predict(input)
-            output = np.reshape(output, (128, 128, 128))
-
-            if (save_truths):
-
-                truth = np.reshape(self.y_train[i], (128, 128, 128))
-                np.save(os.path.join(truth_out_dir, self.keys[i]), truth)
-
-            np.save(os.path.join(pred_out_dir, self.keys[i]), output)
-            print(self.keys[i])
-
     def generate_real_samples(self, n_samples, patch_shape):
 
         ix = np.random.randint(0, self.x_train.shape[0], n_samples)
@@ -193,13 +242,13 @@ class GANDatasetSingle:
         y = np.ones((n_samples, patch_shape, patch_shape, 1))
         return [X1, X2], y
 
-    def generate_fake_samples(self, g_model, samples, patch_shape):
+    def generate_fake_samples(self, samples, patch_shape):
 
-        X = g_model.predict(samples)
+        X = self.generator.predict(samples)
         y = np.zeros((len(X), patch_shape, patch_shape, 1))
         return X, y
 
-    def train(self, d_model, g_model, gan_model, n_epochs = 100, n_batch = 1, n_patch = 16):
+    def train(self, n_epochs = 100, n_batch = 1, n_patch = 16):
 
         self.d1_losses = []
         self.d2_losses = []
@@ -216,11 +265,11 @@ class GANDatasetSingle:
         for i in range(n_steps):
 
             [X_realA, X_realB], y_real = self.generate_real_samples(n_batch, n_patch)
-            X_fakeB, y_fake = self.generate_fake_samples(g_model, X_realA, n_patch)
-            d_loss1 = d_model.train_on_batch([X_realA, X_realB], y_real)
-            d_loss2 = d_model.train_on_batch([X_realA, X_fakeB], y_fake)
+            X_fakeB, y_fake = self.generate_fake_samples(X_realA, n_patch)
+            d_loss1 = self.discriminator.train_on_batch([X_realA, X_realB], y_real)
+            d_loss2 = self.discriminator.train_on_batch([X_realA, X_fakeB], y_fake)
 
-            g_loss, _, _ = gan_model.train_on_batch(X_realA, [y_real, X_realB])
+            g_loss, _, _ = self.gan.train_on_batch(X_realA, [y_real, X_realB])
 
             self.d1_losses.append(d_loss1)
             self.d2_losses.append(d_loss2)
@@ -235,19 +284,18 @@ class GANDatasetSingle:
                 self.g_epoch_losses.append(g_loss)
 
                 temp_in = np.reshape(self.x_train[555], (1, 1024, 1024, 1))
-                temp_out = g_model.predict(temp_in)
+                temp_out = self.generator.predict(temp_in)
                 temp_out = np.reshape(temp_out, (128, 128, 128))
-                real_out = np.reshape(self.y_train[555], (128, 128))
+                real_out = np.reshape(self.y_train[555], (128, 128, 128))
 
                 f = plt.figure()
                 f.add_subplot(1, 2, 1)
-                plt.imshow(real_out[64], cmap = 'gray')
+                plt.imshow(real_out[64], cmap = 'gray', vmin = 0, vmax = 1)
 
-                plt.add_subplot(1, 2, 2)
-                plt.imshow(temp_out[64], cmap = 'gray')
+                f.add_subplot(1, 2, 2)
+                plt.imshow(temp_out[64], cmap = 'gray', vmin = 0, vmax = 1)
 
                 plt.suptitle("Epoch: {}".format(int(i / len(self.x_train))))
 
                 plt.show(block = True)
-
 

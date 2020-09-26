@@ -46,5 +46,5 @@ def DICOMwaterequivalent(dicom_filename, threshold):
     return( area, equiv_circle_diam, water_equiv_area, water_equiv_circle_diam, hullarea, hullequiv)
 
 
-s = DICOMwaterequivalent(r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0008\01-01-2000-30141\3000549.000000-21954\1-104.dcm", -250, False)
+s = DICOMwaterequivalent(r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0008\01-01-2000-30141\3000549.000000-21954\1-104.dcm", -250)
 print(s)
