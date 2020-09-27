@@ -108,15 +108,18 @@ def volumeRotationAnimation(volumePath):
     for i in range(0, 359):
 
         print(i)
-        gg = plt.imshow(createXRay(volumePath, i), cmap = 'gray')
-        ls.append([gg])
+        #gg = plt.imshow(createXRay(volumePath, i), cmap = 'gray')
+        slice = createXRay(volumePath, i)
+        #plt.imshow(slice, cmap = 'gray', vmin = 0, vmax = 255)
+        plt.imsave(os.path.join('temp_animation', str(i) + '.png'), slice, cmap = 'gray')
+        #ls.append([gg])
 
-    fig = plt.figure()
+    #fig = plt.figure()
 
-    ani = animation.ArtistAnimation(fig, ls, interval = 50, blit = True, repeat_delay = 3000)
-    ani.save('radon_animation.gif')
-    plt.show()
+    #ani = animation.ArtistAnimation(fig, ls, interval = 40, blit = True, repeat_delay = 1000)
+    #ani.save('radon_animation.gif')
+    #plt.show()
 
 
-volumeRotationAnimation(r'D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0001\01-01-2000-30178\3000566.000000-03192/')
+volumeRotationAnimation(r'D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0022\01-01-2000-36179\3000630.000000-50076/')
 

@@ -10,14 +10,14 @@ CT Input          |  Radiograph Projections
 :-------------------------:|:-------------------------:
 ![](/Images/ct_animation.gif)  |  ![](/Images/radon_animation.gif)
 
-### Single View Autoencoder Results
+### Single View Encoder-Decoder Results
 MSE: 0.0011900706052539642 (avg)
 Lung DICE: 0.9411571828756816 (avg)
 SSIM: 0.8068173427439007 (avg)
 
 ![Single Result](/Images/single_view.jpg)
 
-### Double View Autoencoder Results
+### Double View Encoder-Decoder Results
 MSE: 0.000952999815192659 (avg)
 Lung DICE: 0.971042315 (avg)
 SSIM: 0.83141169669 (avg)
