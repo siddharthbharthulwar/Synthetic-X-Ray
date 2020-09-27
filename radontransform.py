@@ -114,9 +114,9 @@ def volumeRotationAnimation(volumePath):
     fig = plt.figure()
 
     ani = animation.ArtistAnimation(fig, ls, interval = 50, blit = True, repeat_delay = 3000)
-
+    ani.save('radon_animation.gif')
     plt.show()
 
 
-#volumeRotationAnimation('chestCT0/volume2/')
+volumeRotationAnimation(r'D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0001\01-01-2000-30178\3000566.000000-03192/')
 
