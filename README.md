@@ -8,7 +8,7 @@ Beer's Law and ray-tracing via the Siddon-Jacobs algorithm are implemented in MA
 
 CT Input          |  Radiograph Projections
 :-------------------------:|:-------------------------:
-![](/Images/ct_animation.gif)  |  ![](/Images/radon_animation.gif)
+![](/Images/ct_animation_2.gif)  |  ![](/Images/radon_animation.gif)
 
 ### Single View Encoder-Decoder Results
 MSE: 0.0011900706052539642 (avg)
