@@ -112,6 +112,9 @@ testp1 = r'Data\Out_New\0008.npy'
 test1 = np.load(testp1)
 test1 = zoom(test1, (2, 4, 4))
 
+print(np.amax(test1))
+print(np.amin(test1))
+
 plt.imshow(test1[1])
 plt.show()
 
