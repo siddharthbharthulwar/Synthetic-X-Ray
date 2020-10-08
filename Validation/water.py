@@ -17,6 +17,21 @@ def findCTDir(key):
     print(os.listdir(root))
 
 
+def normalize(array):
+
+    normalized = (array - np.amin(array)) / (np.amax(array) - np.amin(array))
+
+    return normalized
+
+def interval_mapping(image, from_min, from_max, to_min, to_max):
+    # map values from [from_min, from_max] to [to_min, to_max]
+    # image: input array
+    from_range = from_max - from_min
+    to_range = to_max - to_min
+    scaled = np.array((image - from_min) / float(from_range), dtype=float)
+    return to_min + (scaled * to_range)
+
+
 class WaterEvaluator:
 
     def __init__(self, key):
@@ -115,16 +130,20 @@ test1 = zoom(test1, (2, 4, 4))
 print(np.amax(test1))
 print(np.amin(test1))
 
+s = pydicom.read_file(r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0008\01-01-2000-30141\3000549.000000-21954\1-133.dcm").pixel_array
+print(np.amax(s))
+print(np.amin(s))
+
 plt.imshow(test1[1])
 plt.show()
 
-plt.imshow(pydicom.read_file(r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0008\01-01-2000-30141\3000549.000000-21954\1-001.dcm").pixel_array)
+plt.imshow(s)
 plt.show()
 
 
-print(WaterEquivalentCustom(test1[1], r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0008\01-01-2000-30141\3000549.000000-21954\1-104.dcm", -250))
-s = DICOMwaterequivalent(r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0008\01-01-2000-30141\3000549.000000-21954\1-001.dcm", -250)
-print(s)
+print(WaterEquivalentCustom(test1[1], r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0008\01-01-2000-30141\3000549.000000-21954\1-133.dcm", -250))
+#s = DICOMwaterequivalent(r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0008\01-01-2000-30141\3000549.000000-21954\1-001.dcm", -250)
+print(WaterEquivalentCustom(s, r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0008\01-01-2000-30141\3000549.000000-21954\1-133.dcm", -250))
 '''
 s = DICOMwaterequivalent(r"D:\Documents\School\2020-21\CT\LIDC-IDRI\LIDC-IDRI-0008\01-01-2000-30141\3000549.000000-21954\1-104.dcm", -250)
 print(s)
