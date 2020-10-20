@@ -32,13 +32,6 @@ def interval_mapping(image, from_min, from_max, to_min, to_max):
     return to_min + (scaled * to_range)
 
 
-class WaterEvaluator:
-
-    def __init__(self, key):
-        
-        print(key + " not finished yet")
-
-
 def WaterEquivalentCustom(dicom_image, spacing_filename, threshold):
 
     dicom_pydicom  = pydicom.read_file(spacing_filename)
