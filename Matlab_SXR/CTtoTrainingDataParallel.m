@@ -204,7 +204,7 @@ im = imresize(im, [2048, 2048]);
 
 % gamma correction with gamma=2.0 and contrast-limited adaptive histogram equalization
 im = imadjust(im,[0 1], [0 1], 1);
-im = adapthisteq(im);
+%im = adapthisteq(im);
 im = rot90(im, 2);
 %THESE LINES CHANGED
 
